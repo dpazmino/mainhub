@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import {
   BadgeCheck,
   BookOpen,
@@ -166,6 +166,7 @@ export function AppShell({
   hideShell?: boolean;
 }) {
   const [location] = useLocation();
+  const searchString = useSearch();
   const role = hideShell ? null : roleFromPath(location);
 
   if (!role) {
@@ -247,9 +248,9 @@ export function AppShell({
                       <div className="grid gap-1">
                         {section.items.map((item) => {
                           // Compare full URL including query params for proper active state
-                          const currentPath = location.split("?")[0];
+                          const currentPath = location;
                           const itemPath = item.href.split("?")[0];
-                          const currentParams = new URLSearchParams(location.split("?")[1] || "");
+                          const currentParams = new URLSearchParams(searchString);
                           const itemParams = new URLSearchParams(item.href.split("?")[1] || "");
                           const currentTab = currentParams.get("tab");
                           const itemTab = itemParams.get("tab");
