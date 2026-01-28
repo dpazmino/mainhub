@@ -8,7 +8,6 @@ import {
   LineChart,
   Shield,
   Sparkles,
-  Users,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -121,29 +120,6 @@ function Hero() {
             gets learning access.
           </p>
 
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <Link href="#roles">
-              <Button
-                className="rounded-full px-5 shadow-sm"
-                data-testid="button-choose-role"
-              >
-                Choose a role
-              </Button>
-            </Link>
-            <Link href="/role/student">
-              <Button
-                variant="secondary"
-                className="rounded-full px-5 bg-white/70 border border-border hover:bg-white"
-                data-testid="button-student-preview"
-              >
-                Preview student
-              </Button>
-            </Link>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Users className="h-4 w-4" />
-              <span data-testid="text-hero-note">Three tailored dashboards.</span>
-            </div>
-          </div>
         </div>
 
         <Card className="overflow-hidden border-border/70 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/55 shadow-md">
