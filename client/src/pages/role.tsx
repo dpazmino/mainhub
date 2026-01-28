@@ -22,7 +22,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type RoleKey = "student" | "staff" | "experience";
 
@@ -1235,197 +1234,15 @@ export default function RolePage({ role }: { role: RoleKey }) {
           </div>
         ) : null}
 
-      <div className="pt-8 pb-2">
-        <Tabs defaultValue="overview" className="w-full" data-testid="tabs-role">
-          <TabsList
-            className="w-full justify-start gap-1 rounded-2xl bg-white/60 border border-border p-1"
-            data-testid="tabslist-role"
-          >
-              <TabsTrigger className="rounded-xl" value="overview" data-testid="tab-overview">
-                Overview
-              </TabsTrigger>
-              <TabsTrigger className="rounded-xl" value="learning" data-testid="tab-learning">
-                Learning
-              </TabsTrigger>
-              <TabsTrigger className="rounded-xl" value="engagement" data-testid="tab-engagement">
-                Engagement
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="overview" className="mt-5" data-testid="panel-overview">
-              {role === "student" ? (
-                <StudentPanel datasetState={datasetState} />
-              ) : role === "staff" ? (
-                <StaffPanel />
-              ) : (
-                <ExperiencePanel />
-              )}
-            </TabsContent>
-
-            <TabsContent value="learning" className="mt-5" data-testid="panel-learning">
-              <div className="grid gap-4 lg:grid-cols-3">
-                <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2">
-                      <BookOpen className="h-4 w-4" />
-                      <div className="text-sm font-medium" data-testid="text-learning-title">
-                        Learning platform
-                      </div>
-                    </div>
-                    <div className="text-sm text-muted-foreground" data-testid="text-learning-subtitle">
-                      Available for all roles with learning responsibilities.
-                    </div>
-                  </CardHeader>
-                  <CardContent className="grid gap-3">
-                    <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-learning-module-1">
-                      <div className="text-sm font-medium" data-testid="text-learning-module-1-title">
-                        Module: Media Arts Foundations
-                      </div>
-                      <div className="mt-2 text-sm text-muted-foreground" data-testid="text-learning-module-1-desc">
-                        Story, production basics, and creative confidence.
-                      </div>
-                    </div>
-                    <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-learning-module-2">
-                      <div className="text-sm font-medium" data-testid="text-learning-module-2-title">
-                        Module: Career Readiness
-                      </div>
-                      <div className="mt-2 text-sm text-muted-foreground" data-testid="text-learning-module-2-desc">
-                        Portfolios, interviewing, networking.
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm lg:col-span-2">
-                  <CardHeader className="pb-2">
-                    <div className="text-sm font-medium" data-testid="text-learning-access-title">
-                      Access logic (prototype)
-                    </div>
-                    <div className="text-sm text-muted-foreground" data-testid="text-learning-access-subtitle">
-                      Example rule set based on the brief.
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid gap-3 md:grid-cols-2">
-                      <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-rule-1">
-                        <div className="text-sm font-medium" data-testid="text-rule-1-title">
-                          Staff
-                        </div>
-                        <div className="mt-2 text-sm text-muted-foreground" data-testid="text-rule-1-desc">
-                          All staff personas must access learning.
-                        </div>
-                      </div>
-                      <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-rule-2">
-                        <div className="text-sm font-medium" data-testid="text-rule-2-title">
-                          Students
-                        </div>
-                        <div className="mt-2 text-sm text-muted-foreground" data-testid="text-rule-2-desc">
-                          Learning modules + progress tracking per student profile.
-                        </div>
-                      </div>
-                      <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-rule-3">
-                        <div className="text-sm font-medium" data-testid="text-rule-3-title">
-                          Experience-journey users
-                        </div>
-                        <div className="mt-2 text-sm text-muted-foreground" data-testid="text-rule-3-desc">
-                          Mentors and facilitators get sessions + cohort tools.
-                        </div>
-                      </div>
-                      <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-rule-4">
-                        <div className="text-sm font-medium" data-testid="text-rule-4-title">
-                          Alumni
-                        </div>
-                        <div className="mt-2 text-sm text-muted-foreground" data-testid="text-rule-4-desc">
-                          Returning journeys + job-seeking support tracking.
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="engagement" className="mt-5" data-testid="panel-engagement">
-              <div className="grid gap-4 lg:grid-cols-3">
-                <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
-                  <CardHeader className="pb-2">
-                    <div className="text-sm font-medium" data-testid="text-engagement-title">
-                      Engagement flows
-                    </div>
-                    <div className="text-sm text-muted-foreground" data-testid="text-engagement-subtitle">
-                      End-to-end journey touchpoints.
-                    </div>
-                  </CardHeader>
-                  <CardContent className="grid gap-3">
-                    <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-flow-1">
-                      <div className="text-sm font-medium" data-testid="text-flow-1-title">
-                        Student entry
-                      </div>
-                      <div className="mt-2 text-sm text-muted-foreground" data-testid="text-flow-1-desc">
-                        Intake → assessment → learning plan.
-                      </div>
-                    </div>
-                    <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-flow-2">
-                      <div className="text-sm font-medium" data-testid="text-flow-2-title">
-                        Program participation
-                      </div>
-                      <div className="mt-2 text-sm text-muted-foreground" data-testid="text-flow-2-desc">
-                        Sessions → cohort support → milestones.
-                      </div>
-                    </div>
-                    <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-flow-3">
-                      <div className="text-sm font-medium" data-testid="text-flow-3-title">
-                        Alumni outcomes
-                      </div>
-                      <div className="mt-2 text-sm text-muted-foreground" data-testid="text-flow-3-desc">
-                        Re-engage → job search → job secured tracking.
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm lg:col-span-2">
-                  <CardHeader className="pb-2">
-                    <div className="text-sm font-medium" data-testid="text-engagement-metrics-title">
-                      Engagement metrics (sample)
-                    </div>
-                    <div className="text-sm text-muted-foreground" data-testid="text-engagement-metrics-subtitle">
-                      What staff could watch over time.
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid gap-3 md:grid-cols-3">
-                      <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-engagement-1">
-                        <div className="text-xs text-muted-foreground" data-testid="text-engagement-1-label">
-                          Session attendance
-                        </div>
-                        <div className="mt-2 text-2xl font-semibold" data-testid="text-engagement-1-value">
-                          84%
-                        </div>
-                      </div>
-                      <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-engagement-2">
-                        <div className="text-xs text-muted-foreground" data-testid="text-engagement-2-label">
-                          Mentor participation
-                        </div>
-                        <div className="mt-2 text-2xl font-semibold" data-testid="text-engagement-2-value">
-                          22
-                        </div>
-                      </div>
-                      <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-engagement-3">
-                        <div className="text-xs text-muted-foreground" data-testid="text-engagement-3-label">
-                          Alumni re-engaged
-                        </div>
-                        <div className="mt-2 text-2xl font-semibold" data-testid="text-engagement-3-value">
-                          46
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
+      <div className="pt-8 pb-2" data-testid="panel-overview">
+        {role === "student" ? (
+          <StudentPanel datasetState={datasetState} />
+        ) : role === "staff" ? (
+          <StaffPanel />
+        ) : (
+          <ExperiencePanel />
+        )}
+      </div>
     </div>
   );
 }
