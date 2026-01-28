@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import {
   BadgeCheck,
   BookOpen,
+  Briefcase,
   ClipboardList,
   GraduationCap,
   Handshake,
@@ -10,9 +11,11 @@ import {
   LineChart,
   Settings2,
   Shield,
+  TrendingUp,
   Users,
 } from "lucide-react";
 
+import { loadDataset } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -480,6 +483,65 @@ function ExperiencePanel() {
 
 export default function RolePage({ role }: { role: RoleKey }) {
   const [, setLocation] = useLocation();
+  const [datasetState, setDatasetState] = React.useState<
+    | { status: "loading" }
+    | {
+        status: "ready";
+        kpis: {
+          activePlacements: number;
+          completedPlacements: number;
+          activeStudents: number;
+          mentorsActive: number;
+          avgHourlyWageActive: number;
+        };
+      }
+    | { status: "error"; message: string }
+  >({ status: "loading" });
+
+  React.useEffect(() => {
+    let mounted = true;
+
+    loadDataset()
+      .then((d) => {
+        if (!mounted) return;
+
+        const activeStudents = d.students.filter((s) => s.status.toLowerCase() === "active").length;
+        const mentorsActive = d.mentors.filter((m) => m.status.toLowerCase() === "active").length;
+        const activePlacements = d.placements.filter((p) => p.status.toLowerCase() === "active").length;
+        const completedPlacements = d.placements.filter((p) => p.status.toLowerCase() === "completed").length;
+
+        const activePlacementWages = d.placements
+          .filter((p) => p.status.toLowerCase() === "active")
+          .map((p) => p.hourly_wage)
+          .filter((n) => Number.isFinite(n));
+
+        const avgHourlyWageActive = activePlacementWages.length
+          ? activePlacementWages.reduce((a, b) => a + b, 0) / activePlacementWages.length
+          : 0;
+
+        setDatasetState({
+          status: "ready",
+          kpis: {
+            activePlacements,
+            completedPlacements,
+            activeStudents,
+            mentorsActive,
+            avgHourlyWageActive,
+          },
+        });
+      })
+      .catch((e) => {
+        if (!mounted) return;
+        setDatasetState({
+          status: "error",
+          message: e instanceof Error ? e.message : "Failed to load dataset",
+        });
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen by-noise">
@@ -515,6 +577,118 @@ export default function RolePage({ role }: { role: RoleKey }) {
         <div className="pt-6">
           <QuickActions role={role} />
         </div>
+
+        {role === "staff" ? (
+          <div className="pt-6">
+            <div className="grid gap-3 md:grid-cols-5">
+              <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <div className="text-xs text-muted-foreground" data-testid="text-kpi-active-students-label">
+                        Active students
+                      </div>
+                      <div className="mt-1 text-2xl font-semibold" data-testid="text-kpi-active-students-value">
+                        {datasetState.status === "ready" ? datasetState.kpis.activeStudents : "\u2014"}
+                      </div>
+                    </div>
+                    <div className="rounded-2xl bg-[hsl(var(--primary)/0.12)] p-2">
+                      <Users className="h-4 w-4 text-[hsl(var(--primary))]" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <div className="text-xs text-muted-foreground" data-testid="text-kpi-active-placements-label">
+                        Active placements
+                      </div>
+                      <div className="mt-1 text-2xl font-semibold" data-testid="text-kpi-active-placements-value">
+                        {datasetState.status === "ready" ? datasetState.kpis.activePlacements : "\u2014"}
+                      </div>
+                    </div>
+                    <div className="rounded-2xl bg-[hsl(var(--accent)/0.12)] p-2">
+                      <Briefcase className="h-4 w-4 text-[hsl(var(--accent))]" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <div className="text-xs text-muted-foreground" data-testid="text-kpi-completed-placements-label">
+                        Completed placements
+                      </div>
+                      <div className="mt-1 text-2xl font-semibold" data-testid="text-kpi-completed-placements-value">
+                        {datasetState.status === "ready" ? datasetState.kpis.completedPlacements : "\u2014"}
+                      </div>
+                    </div>
+                    <div className="rounded-2xl bg-[hsl(261_78%_62%/0.12)] p-2">
+                      <BadgeCheck className="h-4 w-4 text-[hsl(261_78%_62%)]" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <div className="text-xs text-muted-foreground" data-testid="text-kpi-avg-wage-label">
+                        Avg wage (active)
+                      </div>
+                      <div className="mt-1 text-2xl font-semibold" data-testid="text-kpi-avg-wage-value">
+                        {datasetState.status === "ready" ? `$${datasetState.kpis.avgHourlyWageActive.toFixed(2)}` : "\u2014"}
+                      </div>
+                    </div>
+                    <div className="rounded-2xl bg-[hsl(var(--primary)/0.12)] p-2">
+                      <TrendingUp className="h-4 w-4 text-[hsl(var(--primary))]" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <div className="text-xs text-muted-foreground" data-testid="text-kpi-active-mentors-label">
+                        Active mentors
+                      </div>
+                      <div className="mt-1 text-2xl font-semibold" data-testid="text-kpi-active-mentors-value">
+                        {datasetState.status === "ready" ? datasetState.kpis.mentorsActive : "\u2014"}
+                      </div>
+                    </div>
+                    <div className="rounded-2xl bg-[hsl(var(--accent)/0.12)] p-2">
+                      <Handshake className="h-4 w-4 text-[hsl(var(--accent))]" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {datasetState.status === "error" ? (
+              <div
+                className="mt-3 rounded-2xl border border-border bg-white/70 p-3 text-sm text-muted-foreground"
+                data-testid="status-dataset-error"
+              >
+                Couldn\u2019t load the dataset: {datasetState.message}
+              </div>
+            ) : (
+              <div
+                className="mt-3 rounded-2xl border border-border bg-white/50 p-3 text-xs text-muted-foreground"
+                data-testid="status-dataset-note"
+              >
+                KPIs are computed from the attached CSV dataset (front-end only).
+              </div>
+            )}
+          </div>
+        ) : null}
 
         <div className="pt-8 pb-10">
           <Tabs defaultValue="overview" className="w-full" data-testid="tabs-role">

@@ -1,0 +1,21 @@
+certification_id,certification_name,issuing_organization,certification_type,description,required_program_id,minimum_age,exam_required,exam_duration_minutes,passing_score,validity_years,renewal_required,cost_to_organization,industry_recognition_level,prerequisites,status,created_at,updated_at
+CERT-000001,Certification Name 1,Microsoft,Creative,Description for certification 1,PROG-0002,15,true,70,71,1,true,75,Regional,Program completion,Active,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000002,Certification Name 2,Google,Professional,Description for certification 2,PROG-0003,16,true,80,72,2,true,100,Industry Standard,null,Active,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000003,Certification Name 3,CompTIA,Industry,Description for certification 3,PROG-0004,17,false,90,73,3,true,125,Entry Level,null,Active,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000004,Certification Name 4,Industry Association,Technical,Description for certification 4,PROG-0005,18,true,100,74,5,true,150,National,null,Active,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000005,Certification Name 5,Adobe,Creative,Description for certification 5,PROG-0006,14,true,110,75,0,false,175,Regional,null,Active,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000006,Certification Name 6,Microsoft,Professional,Description for certification 6,PROG-0007,15,false,120,76,1,true,200,Industry Standard,Basic computer skills,Active,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000007,Certification Name 7,Google,Industry,Description for certification 7,PROG-0008,16,true,130,77,2,true,225,Entry Level,Program completion,Active,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000008,Certification Name 8,CompTIA,Technical,Description for certification 8,PROG-0009,17,true,140,78,3,true,250,National,null,Active,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000009,Certification Name 9,Industry Association,Creative,Description for certification 9,PROG-0010,18,false,150,79,5,true,275,Regional,null,Active,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000010,Certification Name 10,Adobe,Professional,Description for certification 10,PROG-0001,14,true,160,80,0,false,300,Industry Standard,null,Inactive,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000011,Certification Name 11,Microsoft,Industry,Description for certification 11,PROG-0002,15,true,170,81,1,true,325,Entry Level,null,Active,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000012,Certification Name 12,Google,Technical,Description for certification 12,PROG-0003,16,false,180,82,2,true,350,National,Basic computer skills,Active,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000013,Certification Name 13,CompTIA,Creative,Description for certification 13,PROG-0004,17,true,190,83,3,true,375,Regional,Program completion,Active,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000014,Certification Name 14,Industry Association,Professional,Description for certification 14,PROG-0005,18,true,200,84,5,true,400,Industry Standard,null,Active,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000015,Certification Name 15,Adobe,Industry,Description for certification 15,PROG-0006,14,false,210,85,0,false,425,Entry Level,null,Active,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000016,Certification Name 16,Microsoft,Technical,Description for certification 16,PROG-0007,15,true,220,86,1,true,450,National,null,Active,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000017,Certification Name 17,Google,Creative,Description for certification 17,PROG-0008,16,true,230,87,2,true,475,Regional,null,Active,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000018,Certification Name 18,CompTIA,Professional,Description for certification 18,PROG-0009,17,false,60,88,3,true,500,Industry Standard,Basic computer skills,Active,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000019,Certification Name 19,Industry Association,Industry,Description for certification 19,PROG-0010,18,true,70,89,5,true,525,Entry Level,Program completion,Active,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
+CERT-000020,Certification Name 20,Adobe,Technical,Description for certification 20,PROG-0001,14,true,80,90,0,false,50,National,null,Inactive,2026-01-28T20:15:56.444Z,2026-01-28T20:15:56.444Z
