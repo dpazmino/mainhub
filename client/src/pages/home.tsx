@@ -226,87 +226,98 @@ function Hero() {
   );
 }
 
-function RoleCard({ roleKey }: { roleKey: RoleKey }) {
-  const r = roleConfig[roleKey];
+function About() {
   return (
-    <Card
-      className={cn(
-        "group relative overflow-hidden rounded-3xl border-border/70 bg-white/75 backdrop-blur supports-[backdrop-filter]:bg-white/55 shadow-sm transition-all",
-        "hover:shadow-md hover:-translate-y-0.5"
-      )}
-      data-testid={`card-role-${roleKey}`}
-    >
-      <div className="absolute inset-0 opacity-70 by-shimmer" />
-      <div className="absolute inset-0 by-noise" />
+    <section className="pt-10 md:pt-14" data-testid="section-about">
+      <div className="grid gap-8 md:grid-cols-[1.1fr_0.9fr] md:items-start">
+        <div>
+          <h2 className="font-serif text-2xl md:text-3xl tracking-tight" data-testid="text-about-title">
+            About Better Youth
+          </h2>
+          <p className="mt-3 text-sm md:text-base text-muted-foreground" data-testid="text-about-intro">
+            Better Youth’s mission is to build creative confidence, bridge resource gaps, and prepare foster and
+            system-impacted youth for sustained success in the creative economy.
+          </p>
 
-      <div className="relative p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div
-              className="grid h-10 w-10 place-items-center rounded-2xl border border-border bg-white/70"
-              data-testid={`img-role-icon-${roleKey}`}
-            >
-              {r.icon}
+          <div className="mt-6 grid gap-3" data-testid="grid-about-pillars">
+            <Card className="rounded-3xl border-border/70 bg-white/75 backdrop-blur supports-[backdrop-filter]:bg-white/55 shadow-sm">
+              <div className="p-5" data-testid="card-about-pillar-1">
+                <div className="text-sm font-semibold" data-testid="text-about-pillar-1-title">
+                  Omnidirectional mentoring
+                </div>
+                <div className="mt-2 text-sm text-muted-foreground" data-testid="text-about-pillar-1-desc">
+                  Connection to industry mentors, peers, and community—support that grows with the journey.
+                </div>
+              </div>
+            </Card>
+
+            <Card className="rounded-3xl border-border/70 bg-white/75 backdrop-blur supports-[backdrop-filter]:bg-white/55 shadow-sm">
+              <div className="p-5" data-testid="card-about-pillar-2">
+                <div className="text-sm font-semibold" data-testid="text-about-pillar-2-title">
+                  Media arts training
+                </div>
+                <div className="mt-2 text-sm text-muted-foreground" data-testid="text-about-pillar-2-desc">
+                  Hands-on creative and technical skill-building—designed to close access gaps and grow confidence.
+                </div>
+              </div>
+            </Card>
+
+            <Card className="rounded-3xl border-border/70 bg-white/75 backdrop-blur supports-[backdrop-filter]:bg-white/55 shadow-sm">
+              <div className="p-5" data-testid="card-about-pillar-3">
+                <div className="text-sm font-semibold" data-testid="text-about-pillar-3-title">
+                  Professional skills + social supports
+                </div>
+                <div className="mt-2 text-sm text-muted-foreground" data-testid="text-about-pillar-3-desc">
+                  Employment readiness, resource navigation, and the practical supports that make progress stick.
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+
+        <Card className="overflow-hidden rounded-3xl border-border/70 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/55 shadow-md">
+          <div className="p-5">
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-medium" data-testid="text-about-stats-title">
+                Snapshot of impact
+              </div>
+              <Badge variant="secondary" className="rounded-full" data-testid="badge-about-stats">
+                Since 2008
+              </Badge>
             </div>
-            <div>
-              <div className="text-lg font-semibold tracking-tight" data-testid={`text-role-title-${roleKey}`}>
-                {r.title}
+
+            <div className="mt-4 grid gap-3" data-testid="grid-about-stats">
+              <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-about-stat-1">
+                <div className="text-xs text-muted-foreground" data-testid="text-about-stat-1-label">
+                  Agency partners
+                </div>
+                <div className="mt-1 text-2xl font-semibold" data-testid="text-about-stat-1-value">
+                  30
+                </div>
               </div>
-              <div className="text-sm text-muted-foreground" data-testid={`text-role-subtitle-${roleKey}`}>
-                {r.subtitle}
+              <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-about-stat-2">
+                <div className="text-xs text-muted-foreground" data-testid="text-about-stat-2-label">
+                  Mentoring hours
+                </div>
+                <div className="mt-1 text-2xl font-semibold" data-testid="text-about-stat-2-value">
+                  15,000+
+                </div>
               </div>
+              <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-about-stat-3">
+                <div className="text-xs text-muted-foreground" data-testid="text-about-stat-3-label">
+                  Youth served
+                </div>
+                <div className="mt-1 text-2xl font-semibold" data-testid="text-about-stat-3-value">
+                  12,000+
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-border bg-white/50 p-3 text-xs text-muted-foreground" data-testid="text-about-note">
+              This About content is adapted from betteryouth.org for this prototype.
             </div>
           </div>
-
-          <Link href={r.href}>
-            <Button
-              className="rounded-full"
-              data-testid={`button-open-role-${roleKey}`}
-            >
-              Open
-            </Button>
-          </Link>
-        </div>
-
-        <div className="mt-5 flex flex-wrap gap-2">
-          {r.chips.map((c, idx) => (
-            <Badge
-              key={c}
-              variant="secondary"
-              className="rounded-full bg-white/70 border border-border"
-              data-testid={`badge-role-${roleKey}-${idx}`}
-            >
-              {c}
-            </Badge>
-          ))}
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-function RolePicker() {
-  return (
-    <section id="roles" className="pt-10 md:pt-14">
-      <div className="flex items-end justify-between gap-4">
-        <div>
-          <h2 className="font-serif text-2xl md:text-3xl tracking-tight" data-testid="text-roles-title">
-            Choose your view
-          </h2>
-          <p className="mt-2 text-sm md:text-base text-muted-foreground" data-testid="text-roles-subtitle">
-            Role-based permissions shape what each person sees. This prototype previews the experience.
-          </p>
-        </div>
-        <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground">
-          <BarChart3 className="h-4 w-4" />
-          <span data-testid="text-roles-note">Dashboards & flows</span>
-        </div>
-      </div>
-
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
-        <RoleCard roleKey="student" />
-        <RoleCard roleKey="staff" />
-        <RoleCard roleKey="experience" />
+        </Card>
       </div>
     </section>
   );
@@ -345,7 +356,7 @@ export default function HomePage() {
         </div>
 
         <Hero />
-        <RolePicker />
+        <About />
         <Footer />
       </div>
     </div>

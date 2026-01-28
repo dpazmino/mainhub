@@ -180,7 +180,7 @@ export function AppShell({
               <div className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <Link href="/" data-testid="link-sidebar-home">
-                    <div className="flex items-center gap-3">
+                    <a className="flex items-center gap-3">
                       <div
                         className="grid h-10 w-10 place-items-center rounded-2xl border border-border bg-white shadow-sm"
                         data-testid="img-sidebar-logo"
@@ -195,7 +195,7 @@ export function AppShell({
                           Better Youth Hub
                         </div>
                       </div>
-                    </div>
+                    </a>
                   </Link>
                   <Badge
                     variant="secondary"
