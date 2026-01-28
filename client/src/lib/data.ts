@@ -141,16 +141,18 @@ export type Mentor = {
   updated_at: string;
 };
 
-function parseBool(v: string): boolean {
+function parseBool(v: unknown): boolean {
+  if (typeof v !== "string") return false;
   return v.trim().toLowerCase() === "true";
 }
 
-function parseNum(v: string): number {
-  const n = Number(v);
+function parseNum(v: unknown): number {
+  const n = typeof v === "string" ? Number(v) : typeof v === "number" ? v : Number.NaN;
   return Number.isFinite(n) ? n : 0;
 }
 
-function parseNullable(v: string): string | null {
+function parseNullable(v: unknown): string | null {
+  if (typeof v !== "string") return null;
   const t = v.trim();
   return t === "" || t.toLowerCase() === "null" ? null : t;
 }
