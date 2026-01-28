@@ -9,19 +9,31 @@ import {
   Handshake,
   Laptop,
   LineChart,
+  Paperclip,
   Search,
   Settings2,
   Shield,
   TrendingUp,
   Users,
+  X,
 } from "lucide-react";
 
-import { getStudents, getStudentGoals, getStudentSkills, getStudentPlacements, getMentors, getAllPlacements, getStudentProgress, type StudentProgressData } from "@/lib/api";
+import { getStudents, getStudentGoals, getStudentSkills, getStudentPlacements, getMentors, getAllPlacements, getStudentProgress, createSupportRequest, type StudentProgressData } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 type RoleKey = "student" | "staff" | "experience";
 
@@ -363,12 +375,52 @@ function LookupStudentSection({ students, isLoading }: { students: StudentLookup
   );
 }
 
-function QuickActions({ role }: { role: RoleKey }) {
-  const actions: Record<RoleKey, { label: string; icon: React.ReactNode }[]> = {
+function QuickActions({ role, studentId }: { role: RoleKey; studentId?: string }) {
+  const [supportModalOpen, setSupportModalOpen] = React.useState(false);
+  const [supportForm, setSupportForm] = React.useState({
+    requestType: "support",
+    title: "",
+    description: "",
+    attachmentName: "",
+  });
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleSubmitSupportRequest = async () => {
+    if (!studentId || !supportForm.title.trim() || !supportForm.description.trim()) return;
+    
+    setIsSubmitting(true);
+    try {
+      await createSupportRequest({
+        studentId,
+        requestType: supportForm.requestType,
+        title: supportForm.title,
+        description: supportForm.description,
+        attachmentName: supportForm.attachmentName || null,
+      });
+      setSupportModalOpen(false);
+      setSupportForm({ requestType: "support", title: "", description: "", attachmentName: "" });
+    } catch (error) {
+      console.error("Failed to submit support request:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleFileSelect = () => {
+    if (fileInputRef.current?.files?.[0]) {
+      setSupportForm(prev => ({
+        ...prev,
+        attachmentName: fileInputRef.current!.files![0].name,
+      }));
+    }
+  };
+
+  const actions: Record<RoleKey, { label: string; icon: React.ReactNode; onClick?: () => void }[]> = {
     student: [
       { label: "Take skill check", icon: <ClipboardList className="h-4 w-4" /> },
       { label: "View learning path", icon: <BookOpen className="h-4 w-4" /> },
-      { label: "Update support needs", icon: <Users className="h-4 w-4" /> },
+      { label: "Update support needs", icon: <Users className="h-4 w-4" />, onClick: () => setSupportModalOpen(true) },
     ],
     staff: [
       { label: "Open CRM", icon: <Users className="h-4 w-4" /> },
@@ -383,19 +435,135 @@ function QuickActions({ role }: { role: RoleKey }) {
   };
 
   return (
-    <div className="grid gap-3 md:grid-cols-3">
-      {actions[role].map((a, idx) => (
-        <Button
-          key={a.label}
-          variant="secondary"
-          className="justify-start gap-2 rounded-2xl bg-white/70 border border-border hover:bg-white"
-          data-testid={`button-quick-action-${role}-${idx}`}
-        >
-          {a.icon}
-          <span>{a.label}</span>
-        </Button>
-      ))}
-    </div>
+    <>
+      <div className="grid gap-3 md:grid-cols-3">
+        {actions[role].map((a, idx) => (
+          <Button
+            key={a.label}
+            variant="secondary"
+            className="justify-start gap-2 rounded-2xl bg-white/70 border border-border hover:bg-white"
+            data-testid={`button-quick-action-${role}-${idx}`}
+            onClick={a.onClick}
+          >
+            {a.icon}
+            <span>{a.label}</span>
+          </Button>
+        ))}
+      </div>
+
+      <Dialog open={supportModalOpen} onOpenChange={setSupportModalOpen}>
+        <DialogContent className="sm:max-w-[500px]" data-testid="dialog-support-request">
+          <DialogHeader>
+            <DialogTitle data-testid="dialog-support-title">Submit Support Request</DialogTitle>
+            <DialogDescription data-testid="dialog-support-description">
+              Tell us what you need help with. Our team will review your request and get back to you.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="request-type">Request Type</Label>
+              <select
+                id="request-type"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                value={supportForm.requestType}
+                onChange={(e) => setSupportForm(prev => ({ ...prev, requestType: e.target.value }))}
+                data-testid="select-request-type"
+              >
+                <option value="support">General Support</option>
+                <option value="transportation">Transportation</option>
+                <option value="equipment">Equipment/Resources</option>
+                <option value="mentorship">Mentorship</option>
+                <option value="accommodation">Accommodation</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="request-title">Title</Label>
+              <Input
+                id="request-title"
+                placeholder="Brief summary of your request"
+                value={supportForm.title}
+                onChange={(e) => setSupportForm(prev => ({ ...prev, title: e.target.value }))}
+                data-testid="input-request-title"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="request-description">Description</Label>
+              <Textarea
+                id="request-description"
+                placeholder="Please provide details about what you need..."
+                className="min-h-[100px]"
+                value={supportForm.description}
+                onChange={(e) => setSupportForm(prev => ({ ...prev, description: e.target.value }))}
+                data-testid="textarea-request-description"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Attachment (optional)</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  onChange={handleFileSelect}
+                  data-testid="input-file-attachment"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="gap-2"
+                  data-testid="button-attach-file"
+                >
+                  <Paperclip className="h-4 w-4" />
+                  Attach File
+                </Button>
+                {supportForm.attachmentName && (
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <span className="truncate max-w-[200px]">{supportForm.attachmentName}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() => {
+                        setSupportForm(prev => ({ ...prev, attachmentName: "" }));
+                        if (fileInputRef.current) fileInputRef.current.value = "";
+                      }}
+                      data-testid="button-remove-attachment"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setSupportModalOpen(false)}
+              data-testid="button-cancel-request"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmitSupportRequest}
+              disabled={isSubmitting || !supportForm.title.trim() || !supportForm.description.trim()}
+              data-testid="button-submit-request"
+            >
+              {isSubmitting ? "Submitting..." : "Submit Request"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -1158,7 +1326,7 @@ export default function RolePage({ role }: { role: RoleKey }) {
       </div>
 
       <div className="pt-6">
-        <QuickActions role={role} />
+        <QuickActions role={role} studentId={role === "student" && datasetState.status === "ready" ? datasetState.selectedStudent?.student_id : undefined} />
       </div>
 
       {role === "staff" && currentTab === "lookup" ? (

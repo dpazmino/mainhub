@@ -6,6 +6,7 @@ import {
   placements,
   studentOutcomes,
   mentors,
+  supportRequests,
   type User,
   type Student,
   type StudentGoal,
@@ -13,6 +14,7 @@ import {
   type Placement,
   type StudentOutcome,
   type Mentor,
+  type SupportRequest,
   type InsertUser,
   type InsertStudent,
   type InsertStudentGoal,
@@ -20,6 +22,7 @@ import {
   type InsertPlacement,
   type InsertStudentOutcome,
   type InsertMentor,
+  type InsertSupportRequest,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
@@ -61,6 +64,12 @@ export interface IStorage {
   getMentorByUserId(userId: string): Promise<Mentor | undefined>;
   createMentor(mentor: InsertMentor): Promise<Mentor>;
   listMentors(): Promise<Mentor[]>;
+
+  // Support requests
+  getSupportRequests(): Promise<SupportRequest[]>;
+  getStudentSupportRequests(studentId: string): Promise<SupportRequest[]>;
+  createSupportRequest(request: InsertSupportRequest): Promise<SupportRequest>;
+  updateSupportRequest(id: string, updates: Partial<InsertSupportRequest>): Promise<SupportRequest | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -189,6 +198,29 @@ export class DatabaseStorage implements IStorage {
 
   async listMentors(): Promise<Mentor[]> {
     return db.select().from(mentors);
+  }
+
+  // Support requests
+  async getSupportRequests(): Promise<SupportRequest[]> {
+    return db.select().from(supportRequests);
+  }
+
+  async getStudentSupportRequests(studentId: string): Promise<SupportRequest[]> {
+    return db.select().from(supportRequests).where(eq(supportRequests.studentId, studentId));
+  }
+
+  async createSupportRequest(insertRequest: InsertSupportRequest): Promise<SupportRequest> {
+    const [request] = await db.insert(supportRequests).values(insertRequest).returning();
+    return request;
+  }
+
+  async updateSupportRequest(id: string, updates: Partial<InsertSupportRequest>): Promise<SupportRequest | undefined> {
+    const [request] = await db
+      .update(supportRequests)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(supportRequests.id, id))
+      .returning();
+    return request || undefined;
   }
 }
 

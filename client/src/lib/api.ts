@@ -5,6 +5,8 @@ import type {
   Placement,
   StudentOutcome,
   Mentor,
+  SupportRequest,
+  InsertSupportRequest,
 } from "@shared/schema";
 
 const API_BASE = "/api";
@@ -153,4 +155,27 @@ export interface StudentProgressData {
 
 export async function getStudentProgress(studentId: string): Promise<StudentProgressData> {
   return fetchJson<StudentProgressData>(`/students/${studentId}/progress`);
+}
+
+// Support Requests
+export async function getSupportRequests(): Promise<SupportRequest[]> {
+  return fetchJson<SupportRequest[]>("/support-requests");
+}
+
+export async function getStudentSupportRequests(studentId: string): Promise<SupportRequest[]> {
+  return fetchJson<SupportRequest[]>(`/students/${studentId}/support-requests`);
+}
+
+export async function createSupportRequest(request: InsertSupportRequest): Promise<SupportRequest> {
+  return fetchJson<SupportRequest>("/support-requests", {
+    method: "POST",
+    body: JSON.stringify(request),
+  });
+}
+
+export async function updateSupportRequest(id: string, updates: Partial<SupportRequest>): Promise<SupportRequest> {
+  return fetchJson<SupportRequest>(`/support-requests/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(updates),
+  });
 }

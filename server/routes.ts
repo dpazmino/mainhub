@@ -7,6 +7,7 @@ import {
   insertStudentSkillSchema,
   insertPlacementSchema,
   insertStudentOutcomeSchema,
+  insertSupportRequestSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(
@@ -369,6 +370,51 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error fetching mentor:", error);
       res.status(500).json({ error: "Failed to fetch mentor" });
+    }
+  });
+
+  // Support requests routes
+  app.get("/api/support-requests", async (req, res) => {
+    try {
+      const requests = await storage.getSupportRequests();
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching support requests:", error);
+      res.status(500).json({ error: "Failed to fetch support requests" });
+    }
+  });
+
+  app.get("/api/students/:studentId/support-requests", async (req, res) => {
+    try {
+      const requests = await storage.getStudentSupportRequests(req.params.studentId);
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching student support requests:", error);
+      res.status(500).json({ error: "Failed to fetch student support requests" });
+    }
+  });
+
+  app.post("/api/support-requests", async (req, res) => {
+    try {
+      const validated = insertSupportRequestSchema.parse(req.body);
+      const request = await storage.createSupportRequest(validated);
+      res.status(201).json(request);
+    } catch (error) {
+      console.error("Error creating support request:", error);
+      res.status(400).json({ error: "Invalid support request data" });
+    }
+  });
+
+  app.patch("/api/support-requests/:id", async (req, res) => {
+    try {
+      const request = await storage.updateSupportRequest(req.params.id, req.body);
+      if (!request) {
+        return res.status(404).json({ error: "Support request not found" });
+      }
+      res.json(request);
+    } catch (error) {
+      console.error("Error updating support request:", error);
+      res.status(500).json({ error: "Failed to update support request" });
     }
   });
 

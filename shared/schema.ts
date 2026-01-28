@@ -169,6 +169,24 @@ export const mentors = pgTable("mentors", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Student Support Requests table
+export const supportRequests = pgTable("support_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  studentId: varchar("student_id").notNull().references(() => students.id),
+  requestType: text("request_type").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  attachmentUrl: text("attachment_url"),
+  attachmentName: text("attachment_name"),
+  priority: text("priority").default("normal"),
+  status: text("status").default("pending"),
+  assignedStaffId: varchar("assigned_staff_id"),
+  resolvedAt: timestamp("resolved_at"),
+  resolutionNotes: text("resolution_notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Relations
 export const userRolesRelations = relations(userRoles, ({ one }) => ({
   user: one(users, {
@@ -231,6 +249,13 @@ export const mentorsRelations = relations(mentors, ({ one }) => ({
   }),
 }));
 
+export const supportRequestsRelations = relations(supportRequests, ({ one }) => ({
+  student: one(students, {
+    fields: [supportRequests.studentId],
+    references: [students.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -274,6 +299,12 @@ export const insertMentorSchema = createInsertSchema(mentors).omit({
   updatedAt: true,
 });
 
+export const insertSupportRequestSchema = createInsertSchema(supportRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -295,3 +326,6 @@ export type StudentOutcome = typeof studentOutcomes.$inferSelect;
 
 export type InsertMentor = z.infer<typeof insertMentorSchema>;
 export type Mentor = typeof mentors.$inferSelect;
+
+export type InsertSupportRequest = z.infer<typeof insertSupportRequestSchema>;
+export type SupportRequest = typeof supportRequests.$inferSelect;
