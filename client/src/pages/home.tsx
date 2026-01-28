@@ -1,11 +1,8 @@
 import * as React from "react";
 import { Link } from "wouter";
 import {
-  BookOpen,
   GraduationCap,
   Handshake,
-  Laptop,
-  LineChart,
   Shield,
   Sparkles,
 } from "lucide-react";
@@ -93,109 +90,22 @@ function TopBar() {
 function Hero() {
   return (
     <section className="pt-10 md:pt-16">
-      <div className="grid gap-10 md:grid-cols-[1.25fr_0.75fr] md:items-end">
-        <div>
-          <Badge
-            className="rounded-full px-3 py-1 text-[12px] bg-white/70 text-foreground border border-border shadow-sm"
-            variant="secondary"
-            data-testid="badge-hero"
-          >
-            Role-based platform • learning + engagement + outcomes
-          </Badge>
+      <div>
+        <Badge
+          className="rounded-full px-3 py-1 text-[12px] bg-white/70 text-foreground border border-border shadow-sm"
+          variant="secondary"
+          data-testid="badge-hero"
+        >
+          Role-based platform • learning + engagement + outcomes
+        </Badge>
 
-          <h1
-            className="mt-4 font-serif text-4xl md:text-6xl leading-[1.03] tracking-[-0.02em]"
-            data-testid="text-hero-title"
-          >
-            A hub that meets people where they are—
-            <span className="text-foreground"> then guides the journey forward.</span>
-          </h1>
-
-          <p
-            className="mt-4 max-w-2xl text-base md:text-lg text-muted-foreground"
-            data-testid="text-hero-subtitle"
-          >
-            Switch between personas to preview permissions and workflows for staff/admin, students, and
-            experience-journey users (mentors, partners, alumni). Everyone with learning responsibilities
-            gets learning access.
-          </p>
-
-        </div>
-
-        <Card className="overflow-hidden border-border/70 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/55 shadow-md">
-          <div className="p-5">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium" data-testid="text-snapshot-title">
-                Snapshot
-              </div>
-              <Badge variant="secondary" className="rounded-full" data-testid="badge-snapshot">
-                v0
-              </Badge>
-            </div>
-
-            <div className="mt-4 grid gap-3">
-              <div
-                className="flex items-start gap-3 rounded-2xl border border-border bg-white/60 p-3"
-                data-testid="card-snapshot-learning"
-              >
-                <div className="mt-0.5 rounded-xl bg-[hsl(var(--primary)/0.12)] p-2">
-                  <BookOpen className="h-4 w-4 text-[hsl(var(--primary))]" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-medium" data-testid="text-snapshot-learning-title">
-                    Learning
-                  </div>
-                  <div className="text-sm text-muted-foreground" data-testid="text-snapshot-learning-desc">
-                    Modules, sessions, and progress tracking.
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className="flex items-start gap-3 rounded-2xl border border-border bg-white/60 p-3"
-                data-testid="card-snapshot-tools"
-              >
-                <div className="mt-0.5 rounded-xl bg-[hsl(var(--accent)/0.12)] p-2">
-                  <Laptop className="h-4 w-4 text-[hsl(var(--accent))]" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-medium" data-testid="text-snapshot-tools-title">
-                    Tools
-                  </div>
-                  <div className="text-sm text-muted-foreground" data-testid="text-snapshot-tools-desc">
-                    CRM and device management access.
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className="flex items-start gap-3 rounded-2xl border border-border bg-white/60 p-3"
-                data-testid="card-snapshot-analytics"
-              >
-                <div className="mt-0.5 rounded-xl bg-[hsl(261_78%_62%/0.12)] p-2">
-                  <LineChart className="h-4 w-4 text-[hsl(261_78%_62%)]" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-medium" data-testid="text-snapshot-analytics-title">
-                    Outcomes
-                  </div>
-                  <div
-                    className="text-sm text-muted-foreground"
-                    data-testid="text-snapshot-analytics-desc"
-                  >
-                    KPIs from entry → alumni → workforce.
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 rounded-2xl border border-border bg-white/50 p-3">
-              <div className="text-xs text-muted-foreground" data-testid="text-snapshot-footer">
-                This is a UI prototype (no saved data).
-              </div>
-            </div>
-          </div>
-        </Card>
+        <h1
+          className="mt-4 font-serif text-4xl md:text-6xl leading-[1.03] tracking-[-0.02em]"
+          data-testid="text-hero-title"
+        >
+          A hub that meets people where they are—
+          <span className="text-foreground"> then guides the journey forward.</span>
+        </h1>
       </div>
     </section>
   );
