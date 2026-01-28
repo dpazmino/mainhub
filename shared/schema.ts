@@ -1,14 +1,17 @@
 import { sql } from "drizzle-orm";
 import { relations } from "drizzle-orm";
-import { pgTable, text, varchar, boolean, integer, decimal, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, boolean, integer, decimal, timestamp, index, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Users table with role-based access
-export const users = pgTable("users", {
+// Export and import Replit Auth tables (sessions and users table from auth blueprint)
+export * from "./models/auth";
+import { users, sessions } from "./models/auth";
+
+// User roles extension (extends the Replit Auth users table with role info)
+export const userRoles = pgTable("user_roles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: text("email").notNull().unique(),
-  name: text("name").notNull(),
+  userId: varchar("user_id").notNull().unique(),
   role: text("role").notNull(), // 'student', 'staff', 'mentor'
   studentId: varchar("student_id"), // references student record if role=student
   mentorId: varchar("mentor_id"), // references mentor record if role=mentor
@@ -167,13 +170,17 @@ export const mentors = pgTable("mentors", {
 });
 
 // Relations
-export const usersRelations = relations(users, ({ one }) => ({
+export const userRolesRelations = relations(userRoles, ({ one }) => ({
+  user: one(users, {
+    fields: [userRoles.userId],
+    references: [users.id],
+  }),
   student: one(students, {
-    fields: [users.studentId],
+    fields: [userRoles.studentId],
     references: [students.id],
   }),
   mentor: one(mentors, {
-    fields: [users.mentorId],
+    fields: [userRoles.mentorId],
     references: [mentors.id],
   }),
 }));
