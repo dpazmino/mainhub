@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Laptop,
   LineChart,
+  Search,
   Settings2,
   Shield,
   Users,
@@ -77,15 +78,21 @@ const navByRole: Record<
         },
         {
           label: "CRM",
-          href: "/role/staff?tab=engagement",
+          href: "/role/staff?tab=crm",
           icon: <Users className="h-4 w-4" />,
           testId: "link-nav-crm",
         },
         {
           label: "Devices",
-          href: "/role/staff?tab=engagement",
+          href: "/role/staff?tab=devices",
           icon: <Laptop className="h-4 w-4" />,
           testId: "link-nav-devices",
+        },
+        {
+          label: "Lookup Student",
+          href: "/role/staff?tab=lookup",
+          icon: <Search className="h-4 w-4" />,
+          testId: "link-nav-lookup",
         },
       ],
     },
@@ -119,19 +126,19 @@ const navByRole: Record<
         },
         {
           label: "Mentors",
-          href: "/role/experience?tab=engagement",
+          href: "/role/experience?tab=mentors",
           icon: <Handshake className="h-4 w-4" />,
           testId: "link-nav-mentors",
         },
         {
           label: "Alumni",
-          href: "/role/experience?tab=engagement",
+          href: "/role/experience?tab=alumni",
           icon: <BadgeCheck className="h-4 w-4" />,
           testId: "link-nav-alumni",
         },
         {
           label: "Partner space",
-          href: "/role/experience?tab=engagement",
+          href: "/role/experience?tab=partners",
           icon: <Settings2 className="h-4 w-4" />,
           testId: "link-nav-partners",
         },
@@ -179,23 +186,21 @@ export function AppShell({
             <Card className="rounded-3xl border-border/70 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-md">
               <div className="p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <Link href="/" data-testid="link-sidebar-home">
-                    <a className="flex items-center gap-3">
-                      <div
-                        className="grid h-10 w-10 place-items-center rounded-2xl border border-border bg-white shadow-sm"
-                        data-testid="img-sidebar-logo"
-                      >
-                        <span className="font-serif text-lg">BY</span>
+                  <Link href="/" className="flex items-center gap-3" data-testid="link-sidebar-home">
+                    <div
+                      className="grid h-10 w-10 place-items-center rounded-2xl border border-border bg-white shadow-sm"
+                      data-testid="img-sidebar-logo"
+                    >
+                      <span className="font-serif text-lg">BY</span>
+                    </div>
+                    <div className="leading-tight">
+                      <div className="text-xs text-muted-foreground" data-testid="text-sidebar-kicker">
+                        Better Youth
                       </div>
-                      <div className="leading-tight">
-                        <div className="text-xs text-muted-foreground" data-testid="text-sidebar-kicker">
-                          Better Youth
-                        </div>
-                        <div className="text-sm font-semibold tracking-tight" data-testid="text-sidebar-title">
-                          Better Youth Hub
-                        </div>
+                      <div className="text-sm font-semibold tracking-tight" data-testid="text-sidebar-title">
+                        Better Youth Hub
                       </div>
-                    </a>
+                    </div>
                   </Link>
                   <Badge
                     variant="secondary"
@@ -241,23 +246,31 @@ export function AppShell({
                       </div>
                       <div className="grid gap-1">
                         {section.items.map((item) => {
-                          const isActive = location.split("?")[0] === item.href.split("?")[0];
+                          // Compare full URL including query params for proper active state
+                          const currentPath = location.split("?")[0];
+                          const itemPath = item.href.split("?")[0];
+                          const currentParams = new URLSearchParams(location.split("?")[1] || "");
+                          const itemParams = new URLSearchParams(item.href.split("?")[1] || "");
+                          const currentTab = currentParams.get("tab");
+                          const itemTab = itemParams.get("tab");
+                          // Active if paths match AND either both have same tab or neither has a tab
+                          const isActive = currentPath === itemPath && currentTab === itemTab;
                           return (
-                            <Link key={item.href} href={item.href}>
-                              <a
-                                className={cn(
-                                  "flex items-center gap-2 rounded-2xl border px-3 py-2 text-sm transition-colors",
-                                  isActive
-                                    ? "border-[hsl(var(--primary)/0.25)] bg-[hsl(var(--primary)/0.08)]"
-                                    : "border-border bg-white/50 hover:bg-white"
-                                )}
-                                data-testid={item.testId}
-                              >
-                                <span className={cn(isActive ? "text-[hsl(var(--primary))]" : "text-muted-foreground")}>
-                                  {item.icon}
-                                </span>
-                                <span className="font-medium">{item.label}</span>
-                              </a>
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              className={cn(
+                                "flex items-center gap-2 rounded-2xl border px-3 py-2 text-sm transition-colors",
+                                isActive
+                                  ? "border-[hsl(var(--primary)/0.25)] bg-[hsl(var(--primary)/0.08)]"
+                                  : "border-border bg-white/50 hover:bg-white"
+                              )}
+                              data-testid={item.testId}
+                            >
+                              <span className={cn(isActive ? "text-[hsl(var(--primary))]" : "text-muted-foreground")}>
+                                {item.icon}
+                              </span>
+                              <span className="font-medium">{item.label}</span>
                             </Link>
                           );
                         })}

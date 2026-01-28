@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import {
   BadgeCheck,
   BookOpen,
@@ -9,6 +9,7 @@ import {
   Handshake,
   Laptop,
   LineChart,
+  Search,
   Settings2,
   Shield,
   TrendingUp,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { getStudents, getStudentGoals, getStudentSkills, getStudentPlacements, getMentors, getAllPlacements } from "@/lib/api";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -93,6 +95,231 @@ function RoleHeader({ role }: { role: RoleKey }) {
           <RolePill key={a} label={a} />
         ))}
       </div>
+    </div>
+  );
+}
+
+interface StudentLookupResult {
+  id: number;
+  studentId: string;
+  ageRange: string;
+  enrollmentDate: string;
+  gradeLevel: string;
+  schoolType: string;
+  primaryLanguage: string;
+  transportationNeeds: boolean;
+  hasIep: boolean;
+  photoConsent: boolean;
+  status: string;
+}
+
+function LookupStudentSection({ students, isLoading }: { students: StudentLookupResult[]; isLoading: boolean }) {
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [selectedStudent, setSelectedStudent] = React.useState<StudentLookupResult | null>(null);
+
+  const filteredStudents = React.useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const query = searchQuery.toLowerCase();
+    return students.filter(
+      (s) =>
+        s.studentId.toLowerCase().includes(query) ||
+        s.gradeLevel.toLowerCase().includes(query) ||
+        s.schoolType.toLowerCase().includes(query)
+    );
+  }, [students, searchQuery]);
+
+  const handleStudentSelect = (student: StudentLookupResult) => {
+    setSelectedStudent(student);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, student: StudentLookupResult) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleStudentSelect(student);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-lg font-semibold" data-testid="text-lookup-title">
+            Student Lookup
+          </h2>
+          <p className="text-sm text-muted-foreground" data-testid="text-lookup-description">
+            Loading student data...
+          </p>
+        </div>
+        <Card className="rounded-2xl bg-white/70 border-border/70">
+          <CardContent className="p-6 text-center">
+            <p className="text-muted-foreground" data-testid="text-loading">
+              Loading students...
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold" data-testid="text-lookup-title">
+          Student Lookup
+        </h2>
+        <p className="text-sm text-muted-foreground" data-testid="text-lookup-description">
+          Search for students by ID, grade level, or school type
+        </p>
+      </div>
+
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="Enter student ID or search term..."
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setSelectedStudent(null);
+          }}
+          className="pl-10 rounded-xl"
+          data-testid="input-student-search"
+        />
+      </div>
+
+      {searchQuery.trim() && (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground" data-testid="text-search-results-count">
+            {filteredStudents.length} result{filteredStudents.length !== 1 ? "s" : ""} found
+          </p>
+
+          {filteredStudents.length > 0 && (
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3" role="listbox" aria-label="Student search results">
+              {filteredStudents.slice(0, 12).map((student) => (
+                <div
+                  key={student.id}
+                  role="option"
+                  aria-selected={selectedStudent?.id === student.id}
+                  tabIndex={0}
+                  className={`rounded-2xl cursor-pointer transition-all hover:shadow-md border p-4 ${
+                    selectedStudent?.id === student.id
+                      ? "ring-2 ring-primary bg-primary/5 border-primary/30"
+                      : "bg-white/70 border-border/70"
+                  }`}
+                  onClick={() => handleStudentSelect(student)}
+                  onKeyDown={(e) => handleKeyDown(e, student)}
+                  data-testid={`card-student-result-${student.id}`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-medium" data-testid={`text-student-id-${student.id}`}>
+                        {student.studentId}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {student.gradeLevel} · {student.schoolType}
+                      </div>
+                    </div>
+                    <Badge
+                      variant={student.status.toLowerCase() === "active" ? "default" : "secondary"}
+                      className="text-xs"
+                      data-testid={`badge-student-status-${student.id}`}
+                    >
+                      {student.status}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {filteredStudents.length === 0 && (
+            <Card className="rounded-2xl bg-white/70 border-border/70">
+              <CardContent className="p-6 text-center">
+                <p className="text-muted-foreground" data-testid="text-no-results">
+                  No students found matching "{searchQuery}"
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {selectedStudent && (
+        <Card className="rounded-2xl bg-white/70 border-border/70 shadow-sm">
+          <CardHeader className="pb-2">
+            <h3 className="text-base font-semibold" data-testid="text-selected-student-title">
+              Student Details
+            </h3>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div>
+                <div className="text-xs text-muted-foreground">Student ID</div>
+                <div className="font-medium" data-testid="text-detail-student-id">
+                  {selectedStudent.studentId}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Age Range</div>
+                <div className="font-medium" data-testid="text-detail-age-range">
+                  {selectedStudent.ageRange}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Grade Level</div>
+                <div className="font-medium" data-testid="text-detail-grade-level">
+                  {selectedStudent.gradeLevel}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">School Type</div>
+                <div className="font-medium" data-testid="text-detail-school-type">
+                  {selectedStudent.schoolType}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Enrollment Date</div>
+                <div className="font-medium" data-testid="text-detail-enrollment-date">
+                  {selectedStudent.enrollmentDate}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Primary Language</div>
+                <div className="font-medium" data-testid="text-detail-primary-language">
+                  {selectedStudent.primaryLanguage}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Transportation Needs</div>
+                <div className="font-medium" data-testid="text-detail-transportation">
+                  {selectedStudent.transportationNeeds ? "Yes" : "No"}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Has IEP</div>
+                <div className="font-medium" data-testid="text-detail-iep">
+                  {selectedStudent.hasIep ? "Yes" : "No"}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Photo Consent</div>
+                <div className="font-medium" data-testid="text-detail-photo-consent">
+                  {selectedStudent.photoConsent ? "Yes" : "No"}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Status</div>
+                <Badge
+                  variant={selectedStudent.status.toLowerCase() === "active" ? "default" : "secondary"}
+                  data-testid="text-detail-status"
+                >
+                  {selectedStudent.status}
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
@@ -638,6 +865,11 @@ function ExperiencePanel() {
 
 export default function RolePage({ role }: { role: RoleKey }) {
   const [, setLocation] = useLocation();
+  const searchString = useSearch();
+  const searchParams = new URLSearchParams(searchString);
+  const currentTab = searchParams.get("tab") || "dashboard";
+  
+  const [allStudents, setAllStudents] = React.useState<StudentLookupResult[]>([]);
   const [datasetState, setDatasetState] = React.useState<
     | { status: "loading" }
     | {
@@ -708,6 +940,21 @@ export default function RolePage({ role }: { role: RoleKey }) {
     ])
       .then(async ([students, mentors, allPlacements]) => {
         if (!mounted) return;
+
+        // Store all students for lookup feature
+        setAllStudents(students.map((s) => ({
+          id: s.id,
+          studentId: s.studentId,
+          ageRange: s.ageRange,
+          enrollmentDate: s.enrollmentDate,
+          gradeLevel: s.gradeLevel,
+          schoolType: s.schoolType,
+          primaryLanguage: s.primaryLanguage,
+          transportationNeeds: s.transportationNeeds,
+          hasIep: s.hasIep,
+          photoConsent: s.photoConsent,
+          status: s.status,
+        })));
 
         const activeStudents = students.filter((s) => s.status.toLowerCase() === "active").length;
         const mentorsActive = mentors.filter((m) => m.status.toLowerCase() === "active").length;
@@ -868,7 +1115,11 @@ export default function RolePage({ role }: { role: RoleKey }) {
         <QuickActions role={role} />
       </div>
 
-      {role === "staff" ? (
+      {role === "staff" && currentTab === "lookup" ? (
+        <div className="pt-6">
+          <LookupStudentSection students={allStudents} isLoading={datasetState.status === "loading"} />
+        </div>
+      ) : role === "staff" ? (
           <div className="pt-6">
             <div className="grid gap-3 md:grid-cols-5">
               <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
