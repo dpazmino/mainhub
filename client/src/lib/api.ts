@@ -111,15 +111,36 @@ export async function getMentor(id: string): Promise<Mentor> {
 }
 
 // Student Progress Timeline
-export interface ProgressTimelineItem {
-  id: string;
-  date: string;
-  title: string;
-  description: string;
-  type: "enrollment" | "goal" | "skill" | "placement" | "milestone";
-  status: "completed" | "in_progress" | "upcoming";
+export interface RecentProgressItem {
+  lessonId: string;
+  week: number;
+  audience: string;
+  video1Completed: boolean;
+  video2Completed: boolean;
+  video3Completed: boolean;
+  xpEarned: number;
+  completedAt: string;
 }
 
-export async function getStudentProgress(studentId: string): Promise<ProgressTimelineItem[]> {
-  return fetchJson<ProgressTimelineItem[]>(`/students/${studentId}/progress`);
+export interface StudentProgressData {
+  user: {
+    id: string;
+    displayName: string;
+    role: string;
+    level: number;
+    totalXp: number;
+    currentStreak: number;
+  };
+  lessonsCompleted: number;
+  totalLessons: number;
+  videosWatched: number;
+  totalVideos: number;
+  progressPercent: number;
+  currentWeek: number;
+  recentProgress: RecentProgressItem[];
+  achievements: string[];
+}
+
+export async function getStudentProgress(studentId: string): Promise<StudentProgressData> {
+  return fetchJson<StudentProgressData>(`/students/${studentId}/progress`);
 }

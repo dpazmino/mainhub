@@ -16,7 +16,7 @@ import {
   Users,
 } from "lucide-react";
 
-import { getStudents, getStudentGoals, getStudentSkills, getStudentPlacements, getMentors, getAllPlacements, getStudentProgress, type ProgressTimelineItem } from "@/lib/api";
+import { getStudents, getStudentGoals, getStudentSkills, getStudentPlacements, getMentors, getAllPlacements, getStudentProgress, type StudentProgressData } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -458,7 +458,7 @@ function StudentPanel({
           performance_rating: string;
           status: string;
         }[];
-        progressTimeline: ProgressTimelineItem[];
+        progressData: StudentProgressData | null;
       }
     | { status: "error"; message: string };
 }) {
@@ -685,85 +685,86 @@ function StudentPanel({
             Progress Timeline
           </div>
           <div className="text-sm text-muted-foreground" data-testid="text-student-timeline-subtitle">
-            Your journey milestones in order.
+            Your learning journey and milestones.
           </div>
         </CardHeader>
         <CardContent>
-          <div className="relative" data-testid="timeline-container">
-            {datasetState.progressTimeline.length === 0 ? (
-              <div className="text-sm text-muted-foreground" data-testid="text-timeline-empty">
-                No progress events yet.
+          {!datasetState.progressData ? (
+            <div className="text-sm text-muted-foreground" data-testid="text-timeline-empty">
+              No progress data yet.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3" data-testid="progress-stats-grid">
+                <div className="rounded-2xl border border-border bg-white/60 p-3 text-center" data-testid="stat-streak">
+                  <div className="text-lg font-bold text-orange-500">{datasetState.progressData.user.currentStreak}</div>
+                  <div className="text-xs text-muted-foreground">Day Streak</div>
+                </div>
+                <div className="rounded-2xl border border-border bg-white/60 p-3 text-center" data-testid="stat-lessons">
+                  <div className="text-lg font-bold text-primary">{datasetState.progressData.lessonsCompleted}/{datasetState.progressData.totalLessons}</div>
+                  <div className="text-xs text-muted-foreground">Lessons</div>
+                </div>
+                <div className="rounded-2xl border border-border bg-white/60 p-3 text-center" data-testid="stat-videos">
+                  <div className="text-lg font-bold text-primary">{datasetState.progressData.videosWatched}/{datasetState.progressData.totalVideos}</div>
+                  <div className="text-xs text-muted-foreground">Videos</div>
+                </div>
+                <div className="rounded-2xl border border-border bg-white/60 p-3 text-center" data-testid="stat-progress">
+                  <div className="text-lg font-bold text-green-600">{datasetState.progressData.progressPercent}%</div>
+                  <div className="text-xs text-muted-foreground">Progress</div>
+                </div>
+                <div className="rounded-2xl border border-border bg-white/60 p-3 text-center" data-testid="stat-week">
+                  <div className="text-lg font-bold text-blue-600">Week {datasetState.progressData.currentWeek}</div>
+                  <div className="text-xs text-muted-foreground">Current</div>
+                </div>
               </div>
-            ) : (
-              <div className="space-y-0">
-                {datasetState.progressTimeline.map((item, index) => (
-                  <div key={item.id} className="relative flex gap-4" data-testid={`timeline-item-${item.id}`}>
-                    <div className="flex flex-col items-center">
-                      <div
-                        className={`z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 ${
-                          item.status === "completed"
-                            ? "border-green-500 bg-green-50 text-green-600"
-                            : item.status === "in_progress"
-                            ? "border-blue-500 bg-blue-50 text-blue-600"
-                            : "border-gray-300 bg-gray-50 text-gray-400"
-                        }`}
-                        data-testid={`timeline-dot-${item.id}`}
-                      >
-                        {item.type === "enrollment" && <GraduationCap className="h-4 w-4" />}
-                        {item.type === "goal" && <ClipboardList className="h-4 w-4" />}
-                        {item.type === "skill" && <TrendingUp className="h-4 w-4" />}
-                        {item.type === "placement" && <Briefcase className="h-4 w-4" />}
-                        {item.type === "milestone" && <BadgeCheck className="h-4 w-4" />}
-                      </div>
-                      {index < datasetState.progressTimeline.length - 1 && (
+
+              {(datasetState.progressData.recentProgress?.length ?? 0) > 0 && (
+                <div className="space-y-0" data-testid="timeline-container">
+                  <div className="text-xs font-medium text-muted-foreground mb-2">Recent Activity</div>
+                  {datasetState.progressData.recentProgress.map((item, index) => (
+                    <div key={item.lessonId} className="relative flex gap-4" data-testid={`timeline-item-${item.lessonId}`}>
+                      <div className="flex flex-col items-center">
                         <div
-                          className={`w-0.5 flex-1 ${
-                            item.status === "completed" ? "bg-green-300" : "bg-gray-200"
-                          }`}
-                          style={{ minHeight: "2rem" }}
-                          data-testid={`timeline-line-${item.id}`}
-                        />
-                      )}
-                    </div>
-                    <div className="flex-1 pb-6">
-                      <div className="rounded-2xl border border-border bg-white/60 p-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <div className="text-sm font-medium truncate" data-testid={`timeline-title-${item.id}`}>
-                              {item.title}
-                            </div>
-                            <div className="mt-1 text-xs text-muted-foreground" data-testid={`timeline-desc-${item.id}`}>
-                              {item.description}
-                            </div>
-                          </div>
-                          <Badge
-                            variant="secondary"
-                            className={`rounded-full text-[10px] shrink-0 ${
-                              item.status === "completed"
-                                ? "bg-green-100 text-green-700"
-                                : item.status === "in_progress"
-                                ? "bg-blue-100 text-blue-700"
-                                : "bg-gray-100 text-gray-600"
-                            }`}
-                            data-testid={`timeline-status-${item.id}`}
-                          >
-                            {item.status === "completed" ? "Done" : item.status === "in_progress" ? "Active" : "Upcoming"}
-                          </Badge>
+                          className="z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 border-green-500 bg-green-50 text-green-600"
+                          data-testid={`timeline-dot-${item.lessonId}`}
+                        >
+                          <BookOpen className="h-4 w-4" />
                         </div>
-                        <div className="mt-2 text-[10px] text-muted-foreground" data-testid={`timeline-date-${item.id}`}>
-                          {new Date(item.date).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}
+                        {index < (datasetState.progressData?.recentProgress?.length ?? 0) - 1 && (
+                          <div className="w-0.5 flex-1 bg-green-300" style={{ minHeight: "2rem" }} />
+                        )}
+                      </div>
+                      <div className="flex-1 pb-4">
+                        <div className="rounded-2xl border border-border bg-white/60 p-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium" data-testid={`timeline-title-${item.lessonId}`}>
+                                Lesson: {item.lessonId}
+                              </div>
+                              <div className="mt-1 text-xs text-muted-foreground">
+                                Week {item.week} • {item.audience} •{" "}
+                                {[item.video1Completed, item.video2Completed, item.video3Completed].filter(Boolean).length}/3 videos
+                              </div>
+                            </div>
+                            <Badge variant="secondary" className="rounded-full text-[10px] bg-green-100 text-green-700">
+                              +{item.xpEarned} XP
+                            </Badge>
+                          </div>
+                          <div className="mt-2 text-[10px] text-muted-foreground">
+                            {new Date(item.completedAt).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -1054,7 +1055,7 @@ export default function RolePage({ role }: { role: RoleKey }) {
           performance_rating: string;
           status: string;
         }[];
-        progressTimeline: ProgressTimelineItem[];
+        progressData: StudentProgressData | null;
       }
     | { status: "error"; message: string }
   >({ status: "loading" });
@@ -1128,12 +1129,12 @@ export default function RolePage({ role }: { role: RoleKey }) {
             studentGoals: [],
             studentSkills: [],
             studentPlacements: [],
-            progressTimeline: [],
+            progressData: null,
           });
           return;
         }
 
-        const [goals, skills, studentPlacements, progressTimeline] = await Promise.all([
+        const [goals, skills, studentPlacements, progressData] = await Promise.all([
           getStudentGoals(selectedStudent.id),
           getStudentSkills(selectedStudent.id),
           getStudentPlacements(selectedStudent.id),
@@ -1200,7 +1201,7 @@ export default function RolePage({ role }: { role: RoleKey }) {
           studentGoals,
           studentSkills,
           studentPlacements: studentPlacementsList,
-          progressTimeline,
+          progressData,
         });
       })
       .catch((e) => {
@@ -1229,14 +1230,31 @@ export default function RolePage({ role }: { role: RoleKey }) {
           </Button>
         </Link>
 
-        <Button
-          variant="secondary"
-          className="rounded-full bg-white/70 border border-border hover:bg-white"
-          onClick={() => setLocation("/")}
-          data-testid="button-switch-role"
-        >
-          Switch role
-        </Button>
+        <div className="flex items-center gap-3">
+          {role === "student" && datasetState.status === "ready" && datasetState.progressData && (
+            <div className="flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 border border-amber-200 px-3 py-1.5" data-testid="student-level-xp">
+              <div className="flex items-center gap-1">
+                <div className="h-6 w-6 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center" data-testid="text-student-level">
+                  {datasetState.progressData.user.level}
+                </div>
+                <span className="text-xs font-medium text-amber-700">Level</span>
+              </div>
+              <div className="w-px h-4 bg-amber-300" />
+              <div className="flex items-center gap-1">
+                <span className="text-sm font-bold text-amber-600" data-testid="text-student-xp">{datasetState.progressData.user.totalXp}</span>
+                <span className="text-xs text-amber-700">XP</span>
+              </div>
+            </div>
+          )}
+          <Button
+            variant="secondary"
+            className="rounded-full bg-white/70 border border-border hover:bg-white"
+            onClick={() => setLocation("/")}
+            data-testid="button-switch-role"
+          >
+            Switch role
+          </Button>
+        </div>
       </div>
 
       <div className="pt-8">

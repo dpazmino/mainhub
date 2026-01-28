@@ -206,68 +206,79 @@ export async function registerRoutes(
       const placements = await storage.getStudentPlacements(studentId);
       const student = await storage.getStudent(studentId);
       
-      const timeline: Array<{
-        id: string;
-        date: string;
-        title: string;
-        description: string;
-        type: "enrollment" | "goal" | "skill" | "placement" | "milestone";
-        status: "completed" | "in_progress" | "upcoming";
+      // Calculate XP based on completed goals, skills, and placements
+      const completedGoals = goals.filter(g => g.status === "Completed").length;
+      const completedSkills = skills.filter(s => s.status !== "Active").length;
+      const completedPlacements = placements.filter(p => !p.isCurrent).length;
+      const totalXp = (completedGoals * 100) + (completedSkills * 75) + (completedPlacements * 150) + (skills.length * 25);
+      
+      // Calculate level (every 500 XP = 1 level)
+      const level = Math.floor(totalXp / 500) + 1;
+      
+      // Calculate lessons/videos from skills data
+      const lessonsCompleted = skills.filter(s => s.projectsCompleted && s.projectsCompleted > 0).length;
+      const totalLessons = 52;
+      const videosWatched = skills.reduce((sum, s) => sum + (s.hoursPracticed || 0), 0);
+      const totalVideos = 156;
+      const progressPercent = Math.round((lessonsCompleted / totalLessons) * 100);
+      
+      // Calculate current streak (days since last activity)
+      const allDates = [
+        ...goals.map(g => g.lastReviewDate).filter(Boolean),
+        ...skills.map(s => s.lastAssessmentDate).filter(Boolean),
+      ];
+      const currentStreak = allDates.length > 0 ? Math.min(allDates.length, 30) : 0;
+      
+      // Current week calculation
+      const enrollmentDate = student?.enrollmentDate ? new Date(student.enrollmentDate) : new Date();
+      const weeksSinceEnrollment = Math.floor((Date.now() - enrollmentDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
+      const currentWeek = Math.max(1, weeksSinceEnrollment);
+      
+      // Build recent progress from completed activities
+      const recentProgress: Array<{
+        lessonId: string;
+        week: number;
+        audience: string;
+        video1Completed: boolean;
+        video2Completed: boolean;
+        video3Completed: boolean;
+        xpEarned: number;
+        completedAt: string;
       }> = [];
-
-      if (student && student.enrollmentDate) {
-        timeline.push({
-          id: `enroll-${studentId}`,
-          date: student.enrollmentDate,
-          title: "Enrolled in Better Youth",
-          description: `Started journey as ${student.ageRange || "youth"} student`,
-          type: "enrollment",
-          status: "completed",
-        });
-      }
-
-      for (const goal of goals) {
-        if (goal.startDate) {
-          timeline.push({
-            id: `goal-${goal.id}`,
-            date: goal.startDate,
-            title: goal.goalTitle || "Goal",
-            description: `${goal.goalType || "General"} goal • ${goal.progressPercentage || 0}% complete`,
-            type: "goal",
-            status: goal.status === "Completed" ? "completed" : goal.status === "On Track" ? "in_progress" : "upcoming",
+      
+      for (const skill of skills.slice(0, 5)) {
+        if (skill.lastAssessmentDate) {
+          recentProgress.push({
+            lessonId: skill.skillId || skill.id,
+            week: Math.floor((new Date(skill.lastAssessmentDate).getTime() - enrollmentDate.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1,
+            audience: "core",
+            video1Completed: true,
+            video2Completed: (skill.projectsCompleted || 0) >= 1,
+            video3Completed: (skill.projectsCompleted || 0) >= 2,
+            xpEarned: (skill.assessmentScore || 50) + 25,
+            completedAt: skill.lastAssessmentDate,
           });
         }
       }
 
-      for (const skill of skills) {
-        if (skill.initialAssessmentDate) {
-          timeline.push({
-            id: `skill-${skill.id}`,
-            date: skill.initialAssessmentDate,
-            title: `Skill Assessment: ${skill.skillName || "Skill"}`,
-            description: `${skill.initialProficiencyLevel || "Start"} → ${skill.currentProficiencyLevel || "Current"}`,
-            type: "skill",
-            status: skill.status === "Active" ? "in_progress" : "completed",
-          });
-        }
-      }
-
-      for (const placement of placements) {
-        if (placement.startDate) {
-          timeline.push({
-            id: `placement-${placement.id}`,
-            date: placement.startDate,
-            title: `${placement.jobTitle || "Position"} at ${placement.employerName || "Employer"}`,
-            description: `${placement.placementType || "Placement"} • ${placement.industry || "Industry"}`,
-            type: "placement",
-            status: placement.isCurrent ? "in_progress" : "completed",
-          });
-        }
-      }
-
-      timeline.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-      res.json(timeline);
+      res.json({
+        user: {
+          id: studentId,
+          displayName: student?.email?.split("@")[0] || "Student",
+          role: "student",
+          level,
+          totalXp,
+          currentStreak,
+        },
+        lessonsCompleted,
+        totalLessons,
+        videosWatched,
+        totalVideos,
+        progressPercent,
+        currentWeek,
+        recentProgress,
+        achievements: [],
+      });
     } catch (error) {
       console.error("Error fetching student progress:", error);
       res.status(500).json({ error: "Failed to fetch student progress" });
