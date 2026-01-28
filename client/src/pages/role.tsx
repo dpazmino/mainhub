@@ -133,44 +133,208 @@ function QuickActions({ role }: { role: RoleKey }) {
   );
 }
 
-function StudentPanel() {
+function StudentPanel({
+  datasetState,
+}: {
+  datasetState:
+    | { status: "loading" }
+    | {
+        status: "ready";
+        kpis: {
+          activePlacements: number;
+          completedPlacements: number;
+          activeStudents: number;
+          mentorsActive: number;
+          avgHourlyWageActive: number;
+        };
+        selectedStudent: {
+          student_id: string;
+          age_range: string;
+          enrollment_date: string;
+          grade_level: string;
+          school_type: string;
+          primary_language: string;
+          transportation_needs: boolean;
+          has_iep: boolean;
+          photo_consent: boolean;
+          status: string;
+        };
+        studentGoals: {
+          goal_id: string;
+          goal_type: string;
+          goal_title: string;
+          progress_percentage: number;
+          status: string;
+          priority: string;
+          target_completion_date: string;
+        }[];
+        studentSkills: {
+          student_skill_id: string;
+          skill_id: string;
+          current_proficiency_level: string;
+          target_proficiency_level: string;
+          assessment_score: number;
+          hours_practiced: number;
+          projects_completed: number;
+          learning_style: string;
+          status: string;
+        }[];
+        studentPlacements: {
+          placement_id: string;
+          placement_type: string;
+          employer_name: string;
+          industry: string;
+          job_title: string;
+          hourly_wage: number;
+          hours_per_week: number;
+          is_current: boolean;
+          better_youth_referral: boolean;
+          performance_rating: string;
+          status: string;
+        }[];
+      }
+    | { status: "error"; message: string };
+}) {
+  if (datasetState.status === "error") {
+    return (
+      <div
+        className="rounded-3xl border border-border bg-white/70 p-5 text-sm text-muted-foreground"
+        data-testid="status-student-dataset-error"
+      >
+        Couldn’t load student data: {datasetState.message}
+      </div>
+    );
+  }
+
+  if (datasetState.status !== "ready") {
+    return (
+      <div className="grid gap-4 lg:grid-cols-3" data-testid="status-student-dataset-loading">
+        <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
+          <CardContent className="p-5">
+            <div className="text-sm text-muted-foreground" data-testid="text-student-loading-1">
+              Loading student profile…
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
+          <CardContent className="p-5">
+            <div className="text-sm text-muted-foreground" data-testid="text-student-loading-2">
+              Loading goals & skills…
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
+          <CardContent className="p-5">
+            <div className="text-sm text-muted-foreground" data-testid="text-student-loading-3">
+              Loading placements…
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const s = datasetState.selectedStudent;
+
+  const goals = datasetState.studentGoals;
+  const topGoal = goals
+    .slice()
+    .sort((a, b) => (b.progress_percentage ?? 0) - (a.progress_percentage ?? 0))[0];
+
+  const skills = datasetState.studentSkills;
+  const topSkill = skills
+    .slice()
+    .sort((a, b) => (b.assessment_score ?? 0) - (a.assessment_score ?? 0))[0];
+
+  const placements = datasetState.studentPlacements;
+  const currentPlacement = placements.find((p) => p.is_current) ?? placements[0];
+
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
         <CardHeader className="pb-2">
-          <div className="text-sm font-medium" data-testid="text-student-assessments-title">
-            Assessments
+          <div className="text-sm font-medium" data-testid="text-student-profile-title">
+            Your profile
           </div>
-          <div className="text-sm text-muted-foreground" data-testid="text-student-assessments-subtitle">
-            Skill-level evaluation + resource needs.
+          <div className="text-sm text-muted-foreground" data-testid="text-student-profile-subtitle">
+            Student ID: {s.student_id}
           </div>
         </CardHeader>
         <CardContent className="grid gap-3">
-          <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-skill-eval">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium" data-testid="text-skill-eval-title">
-                Skill check
+          <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-student-profile-basics">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <div className="text-xs text-muted-foreground" data-testid="text-student-grade-label">
+                  Grade level
+                </div>
+                <div className="mt-1 text-sm font-medium" data-testid="text-student-grade-value">
+                  {s.grade_level}
+                </div>
               </div>
-              <Badge variant="secondary" className="rounded-full" data-testid="badge-skill-eval">
-                Ready
-              </Badge>
-            </div>
-            <div className="mt-2 text-sm text-muted-foreground" data-testid="text-skill-eval-desc">
-              Quick diagnostic across core program competencies.
+              <div>
+                <div className="text-xs text-muted-foreground" data-testid="text-student-age-label">
+                  Age range
+                </div>
+                <div className="mt-1 text-sm font-medium" data-testid="text-student-age-value">
+                  {s.age_range}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground" data-testid="text-student-school-label">
+                  School type
+                </div>
+                <div className="mt-1 text-sm font-medium" data-testid="text-student-school-value">
+                  {s.school_type}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground" data-testid="text-student-language-label">
+                  Language
+                </div>
+                <div className="mt-1 text-sm font-medium" data-testid="text-student-language-value">
+                  {s.primary_language}
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-resource-needs">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium" data-testid="text-resource-needs-title">
-                Resource needs
-              </div>
-              <Badge variant="secondary" className="rounded-full" data-testid="badge-resource-needs">
-                Review
-              </Badge>
+          <div className="flex flex-wrap gap-2" data-testid="row-student-profile-flags">
+            <Badge
+              variant="secondary"
+              className="rounded-full bg-white/70 border border-border"
+              data-testid="badge-student-status"
+            >
+              Status: {s.status}
+            </Badge>
+            <Badge
+              variant="secondary"
+              className="rounded-full bg-white/70 border border-border"
+              data-testid="badge-student-transport"
+            >
+              Transport: {s.transportation_needs ? "Needs" : "No"}
+            </Badge>
+            <Badge
+              variant="secondary"
+              className="rounded-full bg-white/70 border border-border"
+              data-testid="badge-student-iep"
+            >
+              IEP: {s.has_iep ? "Yes" : "No"}
+            </Badge>
+            <Badge
+              variant="secondary"
+              className="rounded-full bg-white/70 border border-border"
+              data-testid="badge-student-photo"
+            >
+              Photo consent: {s.photo_consent ? "Yes" : "No"}
+            </Badge>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-white/50 p-3" data-testid="card-student-enrollment">
+            <div className="text-xs text-muted-foreground" data-testid="text-student-enrollment-label">
+              Enrollment date
             </div>
-            <div className="mt-2 text-sm text-muted-foreground" data-testid="text-resource-needs-desc">
-              Transportation, devices, housing, and other supports.
+            <div className="mt-1 text-sm font-medium" data-testid="text-student-enrollment-value">
+              {s.enrollment_date}
             </div>
           </div>
         </CardContent>
@@ -178,40 +342,88 @@ function StudentPanel() {
 
       <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
         <CardHeader className="pb-2">
-          <div className="text-sm font-medium" data-testid="text-student-learning-title">
-            Learning
+          <div className="text-sm font-medium" data-testid="text-student-goals-title">
+            Goals & progress
           </div>
-          <div className="text-sm text-muted-foreground" data-testid="text-student-learning-subtitle">
-            Modules + progress tracking.
+          <div className="text-sm text-muted-foreground" data-testid="text-student-goals-subtitle">
+            What you’re working toward right now.
           </div>
         </CardHeader>
         <CardContent className="grid gap-3">
-          <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-module-progress">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium" data-testid="text-module-progress-title">
-                Current module
+          <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-student-top-goal">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-sm font-medium truncate" data-testid="text-student-top-goal-title">
+                  {topGoal ? topGoal.goal_title : "No goals found"}
+                </div>
+                <div className="mt-1 text-xs text-muted-foreground" data-testid="text-student-top-goal-meta">
+                  {topGoal ? `${topGoal.goal_type} • ${topGoal.status} • Priority: ${topGoal.priority}` : "—"}
+                </div>
               </div>
-              <Badge variant="secondary" className="rounded-full" data-testid="badge-module-status">
-                In progress
+              <Badge
+                variant="secondary"
+                className="rounded-full"
+                data-testid="badge-student-top-goal-progress"
+              >
+                {topGoal ? `${topGoal.progress_percentage}%` : "—"}
               </Badge>
-            </div>
-            <div className="mt-2 text-sm text-muted-foreground" data-testid="text-module-progress-desc">
-              Media storytelling foundations.
             </div>
             <div className="mt-3">
-              <Progress value={64} data-testid="progress-module" />
-              <div className="mt-2 text-xs text-muted-foreground" data-testid="text-module-progress-meta">
-                64% complete
+              <Progress value={topGoal ? topGoal.progress_percentage : 0} data-testid="progress-student-top-goal" />
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-student-skills">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-sm font-medium" data-testid="text-student-top-skill-title">
+                  {topSkill ? `Skill ${topSkill.skill_id}` : "Skills"}
+                </div>
+                <div className="mt-1 text-xs text-muted-foreground" data-testid="text-student-top-skill-meta">
+                  {topSkill
+                    ? `${topSkill.current_proficiency_level} → ${topSkill.target_proficiency_level} • ${topSkill.learning_style}`
+                    : "No skills found"}
+                </div>
+              </div>
+              <Badge variant="secondary" className="rounded-full" data-testid="badge-student-top-skill-score">
+                {topSkill ? `${topSkill.assessment_score}` : "—"}
+              </Badge>
+            </div>
+
+            <div className="mt-3 grid grid-cols-3 gap-2" data-testid="grid-student-skill-stats">
+              <div className="rounded-2xl border border-border bg-white/60 p-2" data-testid="card-student-hours">
+                <div className="text-[11px] text-muted-foreground" data-testid="text-student-hours-label">
+                  Hours practiced
+                </div>
+                <div className="mt-1 text-sm font-medium" data-testid="text-student-hours-value">
+                  {topSkill ? topSkill.hours_practiced : "—"}
+                </div>
+              </div>
+              <div className="rounded-2xl border border-border bg-white/60 p-2" data-testid="card-student-projects">
+                <div className="text-[11px] text-muted-foreground" data-testid="text-student-projects-label">
+                  Projects
+                </div>
+                <div className="mt-1 text-sm font-medium" data-testid="text-student-projects-value">
+                  {topSkill ? topSkill.projects_completed : "—"}
+                </div>
+              </div>
+              <div className="rounded-2xl border border-border bg-white/60 p-2" data-testid="card-student-skill-status">
+                <div className="text-[11px] text-muted-foreground" data-testid="text-student-skill-status-label">
+                  Skill status
+                </div>
+                <div className="mt-1 text-sm font-medium" data-testid="text-student-skill-status-value">
+                  {topSkill ? topSkill.status : "—"}
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-next-session">
-            <div className="text-sm font-medium" data-testid="text-next-session-title">
-              Next session
+          <div className="rounded-2xl border border-border bg-white/50 p-3" data-testid="card-student-goals-count">
+            <div className="text-xs text-muted-foreground" data-testid="text-student-goals-count-label">
+              Goals in your plan
             </div>
-            <div className="mt-2 text-sm text-muted-foreground" data-testid="text-next-session-desc">
-              Workshop • Thursday 3:00 PM
+            <div className="mt-1 text-sm font-medium" data-testid="text-student-goals-count-value">
+              {goals.length}
             </div>
           </div>
         </CardContent>
@@ -219,39 +431,71 @@ function StudentPanel() {
 
       <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
         <CardHeader className="pb-2">
-          <div className="text-sm font-medium" data-testid="text-student-support-title">
-            Support signals
+          <div className="text-sm font-medium" data-testid="text-student-placement-title">
+            Work placement
           </div>
-          <div className="text-sm text-muted-foreground" data-testid="text-student-support-subtitle">
-            Flags that help staff respond quickly.
+          <div className="text-sm text-muted-foreground" data-testid="text-student-placement-subtitle">
+            Your current or most recent placement.
           </div>
         </CardHeader>
         <CardContent className="grid gap-3">
-          <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-support-device">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium" data-testid="text-support-device-title">
-                Device access
+          <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-student-placement">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-sm font-medium truncate" data-testid="text-student-placement-job">
+                  {currentPlacement ? currentPlacement.job_title : "No placement found"}
+                </div>
+                <div className="mt-1 text-xs text-muted-foreground" data-testid="text-student-placement-org">
+                  {currentPlacement ? `${currentPlacement.employer_name} • ${currentPlacement.industry}` : "—"}
+                </div>
               </div>
-              <Badge variant="secondary" className="rounded-full" data-testid="badge-support-device">
-                Good
+              <Badge variant="secondary" className="rounded-full" data-testid="badge-student-placement-status">
+                {currentPlacement ? currentPlacement.status : "—"}
               </Badge>
             </div>
-            <div className="mt-2 text-sm text-muted-foreground" data-testid="text-support-device-desc">
-              Assigned laptop • last check-in 6 days ago
+
+            <div className="mt-3 grid grid-cols-2 gap-3" data-testid="grid-student-placement-stats">
+              <div>
+                <div className="text-xs text-muted-foreground" data-testid="text-student-wage-label">
+                  Wage
+                </div>
+                <div className="mt-1 text-sm font-medium" data-testid="text-student-wage-value">
+                  {currentPlacement ? `$${currentPlacement.hourly_wage.toFixed(2)}/hr` : "—"}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground" data-testid="text-student-hours-label">
+                  Hours/week
+                </div>
+                <div className="mt-1 text-sm font-medium" data-testid="text-student-hours-week-value">
+                  {currentPlacement ? currentPlacement.hours_per_week : "—"}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground" data-testid="text-student-referral-label">
+                  Better Youth referral
+                </div>
+                <div className="mt-1 text-sm font-medium" data-testid="text-student-referral-value">
+                  {currentPlacement ? (currentPlacement.better_youth_referral ? "Yes" : "No") : "—"}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground" data-testid="text-student-performance-label">
+                  Performance rating
+                </div>
+                <div className="mt-1 text-sm font-medium" data-testid="text-student-performance-value">
+                  {currentPlacement ? currentPlacement.performance_rating : "—"}
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border bg-white/60 p-3" data-testid="card-support-resources">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium" data-testid="text-support-resources-title">
-                Resources
-              </div>
-              <Badge variant="secondary" className="rounded-full" data-testid="badge-support-resources">
-                Pending
-              </Badge>
+          <div className="rounded-2xl border border-border bg-white/50 p-3" data-testid="card-student-placements-count">
+            <div className="text-xs text-muted-foreground" data-testid="text-student-placements-count-label">
+              Placements in history
             </div>
-            <div className="mt-2 text-sm text-muted-foreground" data-testid="text-support-resources-desc">
-              Transportation assistance requested
+            <div className="mt-1 text-sm font-medium" data-testid="text-student-placements-count-value">
+              {placements.length}
             </div>
           </div>
         </CardContent>
@@ -494,6 +738,51 @@ export default function RolePage({ role }: { role: RoleKey }) {
           mentorsActive: number;
           avgHourlyWageActive: number;
         };
+        selectedStudent: {
+          student_id: string;
+          age_range: string;
+          enrollment_date: string;
+          grade_level: string;
+          school_type: string;
+          primary_language: string;
+          transportation_needs: boolean;
+          has_iep: boolean;
+          photo_consent: boolean;
+          status: string;
+        };
+        studentGoals: {
+          goal_id: string;
+          goal_type: string;
+          goal_title: string;
+          progress_percentage: number;
+          status: string;
+          priority: string;
+          target_completion_date: string;
+        }[];
+        studentSkills: {
+          student_skill_id: string;
+          skill_id: string;
+          current_proficiency_level: string;
+          target_proficiency_level: string;
+          assessment_score: number;
+          hours_practiced: number;
+          projects_completed: number;
+          learning_style: string;
+          status: string;
+        }[];
+        studentPlacements: {
+          placement_id: string;
+          placement_type: string;
+          employer_name: string;
+          industry: string;
+          job_title: string;
+          hourly_wage: number;
+          hours_per_week: number;
+          is_current: boolean;
+          better_youth_referral: boolean;
+          performance_rating: string;
+          status: string;
+        }[];
       }
     | { status: "error"; message: string }
   >({ status: "loading" });
@@ -519,6 +808,56 @@ export default function RolePage({ role }: { role: RoleKey }) {
           ? activePlacementWages.reduce((a, b) => a + b, 0) / activePlacementWages.length
           : 0;
 
+        const selectedStudent = d.students[0];
+
+        const studentGoals = selectedStudent
+          ? d.goals
+              .filter((g) => g.student_id === selectedStudent.student_id)
+              .map((g) => ({
+                goal_id: g.goal_id,
+                goal_type: g.goal_type,
+                goal_title: g.goal_title,
+                progress_percentage: g.progress_percentage,
+                status: g.status,
+                priority: g.priority,
+                target_completion_date: g.target_completion_date,
+              }))
+          : [];
+
+        const studentSkills = selectedStudent
+          ? d.skills
+              .filter((sk) => sk.student_id === selectedStudent.student_id)
+              .map((sk) => ({
+                student_skill_id: sk.student_skill_id,
+                skill_id: sk.skill_id,
+                current_proficiency_level: sk.current_proficiency_level,
+                target_proficiency_level: sk.target_proficiency_level,
+                assessment_score: sk.assessment_score,
+                hours_practiced: sk.hours_practiced,
+                projects_completed: sk.projects_completed,
+                learning_style: sk.learning_style,
+                status: sk.status,
+              }))
+          : [];
+
+        const studentPlacements = selectedStudent
+          ? d.placements
+              .filter((p) => p.student_id === selectedStudent.student_id)
+              .map((p) => ({
+                placement_id: p.placement_id,
+                placement_type: p.placement_type,
+                employer_name: p.employer_name,
+                industry: p.industry,
+                job_title: p.job_title,
+                hourly_wage: p.hourly_wage,
+                hours_per_week: p.hours_per_week,
+                is_current: p.is_current,
+                better_youth_referral: p.better_youth_referral,
+                performance_rating: p.performance_rating,
+                status: p.status,
+              }))
+          : [];
+
         setDatasetState({
           status: "ready",
           kpis: {
@@ -528,6 +867,34 @@ export default function RolePage({ role }: { role: RoleKey }) {
             mentorsActive,
             avgHourlyWageActive,
           },
+          selectedStudent: selectedStudent
+            ? {
+                student_id: selectedStudent.student_id,
+                age_range: selectedStudent.age_range,
+                enrollment_date: selectedStudent.enrollment_date,
+                grade_level: selectedStudent.grade_level,
+                school_type: selectedStudent.school_type,
+                primary_language: selectedStudent.primary_language,
+                transportation_needs: selectedStudent.transportation_needs,
+                has_iep: selectedStudent.has_iep,
+                photo_consent: selectedStudent.photo_consent,
+                status: selectedStudent.status,
+              }
+            : {
+                student_id: "—",
+                age_range: "—",
+                enrollment_date: "—",
+                grade_level: "—",
+                school_type: "—",
+                primary_language: "—",
+                transportation_needs: false,
+                has_iep: false,
+                photo_consent: false,
+                status: "—",
+              },
+          studentGoals,
+          studentSkills,
+          studentPlacements,
         });
       })
       .catch((e) => {
@@ -672,7 +1039,13 @@ export default function RolePage({ role }: { role: RoleKey }) {
             </TabsList>
 
             <TabsContent value="overview" className="mt-5" data-testid="panel-overview">
-              {role === "student" ? <StudentPanel /> : role === "staff" ? <StaffPanel /> : <ExperiencePanel />}
+              {role === "student" ? (
+                <StudentPanel datasetState={datasetState} />
+              ) : role === "staff" ? (
+                <StaffPanel />
+              ) : (
+                <ExperiencePanel />
+              )}
             </TabsContent>
 
             <TabsContent value="learning" className="mt-5" data-testid="panel-learning">
