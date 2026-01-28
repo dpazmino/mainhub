@@ -96,7 +96,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async listStudents(): Promise<Student[]> {
-    return db.select().from(students).where(eq(students.status, "active"));
+    return db.select().from(students);
   }
 
   // Student goals
@@ -183,7 +183,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async listMentors(): Promise<Mentor[]> {
-    return db.select().from(mentors).where(eq(mentors.status, "active"));
+    return db.select().from(mentors);
   }
 }
 

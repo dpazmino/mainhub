@@ -15,7 +15,7 @@ import {
   Users,
 } from "lucide-react";
 
-import { loadDataset } from "@/lib/data";
+import { getStudents, getStudentGoals, getStudentSkills, getStudentPlacements, getMentors } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -790,73 +790,100 @@ export default function RolePage({ role }: { role: RoleKey }) {
   React.useEffect(() => {
     let mounted = true;
 
-    loadDataset()
-      .then((d) => {
+    Promise.all([
+      getStudents(),
+      getMentors(),
+    ])
+      .then(async ([students, mentors]) => {
         if (!mounted) return;
 
-        const activeStudents = d.students.filter((s) => s.status.toLowerCase() === "active").length;
-        const mentorsActive = d.mentors.filter((m) => m.status.toLowerCase() === "active").length;
-        const activePlacements = d.placements.filter((p) => p.status.toLowerCase() === "active").length;
-        const completedPlacements = d.placements.filter((p) => p.status.toLowerCase() === "completed").length;
+        const activeStudents = students.filter((s) => s.status === "active").length;
+        const mentorsActive = mentors.filter((m) => m.status === "active").length;
 
-        const activePlacementWages = d.placements
-          .filter((p) => p.status.toLowerCase() === "active")
-          .map((p) => p.hourly_wage)
-          .filter((n) => Number.isFinite(n));
+        const selectedStudent = students[0];
+
+        if (!selectedStudent) {
+          setDatasetState({
+            status: "ready",
+            kpis: {
+              activePlacements: 0,
+              completedPlacements: 0,
+              activeStudents,
+              mentorsActive,
+              avgHourlyWageActive: 0,
+            },
+            selectedStudent: {
+              student_id: "—",
+              age_range: "—",
+              enrollment_date: "—",
+              grade_level: "—",
+              school_type: "—",
+              primary_language: "—",
+              transportation_needs: false,
+              has_iep: false,
+              photo_consent: false,
+              status: "—",
+            },
+            studentGoals: [],
+            studentSkills: [],
+            studentPlacements: [],
+          });
+          return;
+        }
+
+        const [goals, skills, placements] = await Promise.all([
+          getStudentGoals(selectedStudent.id),
+          getStudentSkills(selectedStudent.id),
+          getStudentPlacements(selectedStudent.id),
+        ]);
+
+        const activePlacements = placements.filter((p) => p.status === "active").length;
+        const completedPlacements = placements.filter((p) => p.status === "completed").length;
+
+        const activePlacementWages = placements
+          .filter((p) => p.status === "active")
+          .map((p) => Number(p.hourlyWage) || 0)
+          .filter((n) => Number.isFinite(n) && n > 0);
 
         const avgHourlyWageActive = activePlacementWages.length
           ? activePlacementWages.reduce((a, b) => a + b, 0) / activePlacementWages.length
           : 0;
 
-        const selectedStudent = d.students[0];
+        const studentGoals = goals.map((g) => ({
+          goal_id: g.id,
+          goal_type: g.goalType,
+          goal_title: g.goalTitle,
+          progress_percentage: g.progressPercentage || 0,
+          status: g.status || "active",
+          priority: g.priority || "medium",
+          target_completion_date: g.targetCompletionDate || "",
+        }));
 
-        const studentGoals = selectedStudent
-          ? d.goals
-              .filter((g) => g.student_id === selectedStudent.student_id)
-              .map((g) => ({
-                goal_id: g.goal_id,
-                goal_type: g.goal_type,
-                goal_title: g.goal_title,
-                progress_percentage: g.progress_percentage,
-                status: g.status,
-                priority: g.priority,
-                target_completion_date: g.target_completion_date,
-              }))
-          : [];
+        const studentSkills = skills.map((sk) => ({
+          student_skill_id: sk.id,
+          skill_id: sk.skillId,
+          current_proficiency_level: sk.currentProficiencyLevel || "",
+          target_proficiency_level: sk.targetProficiencyLevel || "",
+          assessment_score: sk.assessmentScore || 0,
+          hours_practiced: sk.hoursPracticed || 0,
+          projects_completed: sk.projectsCompleted || 0,
+          learning_style: sk.learningStyle || "",
+          status: sk.status || "active",
+        }));
 
-        const studentSkills = selectedStudent
-          ? d.skills
-              .filter((sk) => sk.student_id === selectedStudent.student_id)
-              .map((sk) => ({
-                student_skill_id: sk.student_skill_id,
-                skill_id: sk.skill_id,
-                current_proficiency_level: sk.current_proficiency_level,
-                target_proficiency_level: sk.target_proficiency_level,
-                assessment_score: sk.assessment_score,
-                hours_practiced: sk.hours_practiced,
-                projects_completed: sk.projects_completed,
-                learning_style: sk.learning_style,
-                status: sk.status,
-              }))
-          : [];
-
-        const studentPlacements = selectedStudent
-          ? d.placements
-              .filter((p) => p.student_id === selectedStudent.student_id)
-              .map((p) => ({
-                placement_id: p.placement_id,
-                placement_type: p.placement_type,
-                employer_name: p.employer_name,
-                industry: p.industry,
-                job_title: p.job_title,
-                hourly_wage: p.hourly_wage,
-                hours_per_week: p.hours_per_week,
-                is_current: p.is_current,
-                better_youth_referral: p.better_youth_referral,
-                performance_rating: p.performance_rating,
-                status: p.status,
-              }))
-          : [];
+        const studentPlacements = placements.map((p) => ({
+          placement_id: p.id,
+          placement_type: p.placementType || "",
+          employer_name: p.employerName || "",
+          industry: p.industry || "",
+          job_title: p.jobTitle || "",
+          hourly_wage: Number(p.hourlyWage) || 0,
+          hours_per_week: p.hoursPerWeek || 0,
+          is_current: p.isCurrent || false,
+          better_youth_referral: p.betterYouthReferral || false,
+          performance_rating: p.performanceRating || "",
+          status: p.status || "active",
+        }));
 
         setDatasetState({
           status: "ready",
@@ -867,31 +894,18 @@ export default function RolePage({ role }: { role: RoleKey }) {
             mentorsActive,
             avgHourlyWageActive,
           },
-          selectedStudent: selectedStudent
-            ? {
-                student_id: selectedStudent.student_id,
-                age_range: selectedStudent.age_range,
-                enrollment_date: selectedStudent.enrollment_date,
-                grade_level: selectedStudent.grade_level,
-                school_type: selectedStudent.school_type,
-                primary_language: selectedStudent.primary_language,
-                transportation_needs: selectedStudent.transportation_needs,
-                has_iep: selectedStudent.has_iep,
-                photo_consent: selectedStudent.photo_consent,
-                status: selectedStudent.status,
-              }
-            : {
-                student_id: "—",
-                age_range: "—",
-                enrollment_date: "—",
-                grade_level: "—",
-                school_type: "—",
-                primary_language: "—",
-                transportation_needs: false,
-                has_iep: false,
-                photo_consent: false,
-                status: "—",
-              },
+          selectedStudent: {
+            student_id: selectedStudent.id,
+            age_range: selectedStudent.ageRange || "—",
+            enrollment_date: selectedStudent.enrollmentDate || "—",
+            grade_level: selectedStudent.gradeLevel || "—",
+            school_type: selectedStudent.schoolType || "—",
+            primary_language: selectedStudent.primaryLanguage || "—",
+            transportation_needs: selectedStudent.transportationNeeds || false,
+            has_iep: selectedStudent.hasIep || false,
+            photo_consent: selectedStudent.photoConsent || false,
+            status: selectedStudent.status || "—",
+          },
           studentGoals,
           studentSkills,
           studentPlacements,
@@ -901,7 +915,7 @@ export default function RolePage({ role }: { role: RoleKey }) {
         if (!mounted) return;
         setDatasetState({
           status: "error",
-          message: e instanceof Error ? e.message : "Failed to load dataset",
+          message: e instanceof Error ? e.message : "Failed to load data from API",
         });
       });
 
