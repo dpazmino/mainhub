@@ -5,6 +5,7 @@ import {
   Handshake,
   Shield,
   Sparkles,
+  User,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -82,6 +83,16 @@ function TopBar() {
         >
           How it works
         </Button>
+        <Link href="/account">
+          <Button
+            variant="secondary"
+            className="rounded-full bg-white/70 border border-border hover:bg-white gap-2"
+            data-testid="button-account"
+          >
+            <User className="h-4 w-4" />
+            Account
+          </Button>
+        </Link>
       </div>
     </div>
   );

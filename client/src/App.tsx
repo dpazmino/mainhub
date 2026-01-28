@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
 import RolePage from "@/pages/role";
+import AccountPage from "@/pages/account";
 import { AppShell } from "@/components/app-shell";
 import { queryClient } from "./lib/queryClient";
 
@@ -20,6 +21,7 @@ function Router() {
     <Shell>
       <Switch>
         <Route path="/" component={HomePage} />
+        <Route path="/account" component={AccountPage} />
         <Route path="/role/student" component={() => <RolePage role="student" />} />
         <Route path="/role/staff" component={() => <RolePage role="staff" />} />
         <Route path="/role/experience" component={() => <RolePage role="experience" />} />
