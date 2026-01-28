@@ -125,6 +125,16 @@ export async function registerRoutes(
   });
 
   // Placements routes
+  app.get("/api/placements", async (req, res) => {
+    try {
+      const placements = await storage.getAllPlacements();
+      res.json(placements);
+    } catch (error) {
+      console.error("Error fetching all placements:", error);
+      res.status(500).json({ error: "Failed to fetch placements" });
+    }
+  });
+
   app.get("/api/students/:studentId/placements", async (req, res) => {
     try {
       const placements = await storage.getStudentPlacements(req.params.studentId);

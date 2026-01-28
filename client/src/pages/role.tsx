@@ -15,7 +15,7 @@ import {
   Users,
 } from "lucide-react";
 
-import { getStudents, getStudentGoals, getStudentSkills, getStudentPlacements, getMentors } from "@/lib/api";
+import { getStudents, getStudentGoals, getStudentSkills, getStudentPlacements, getMentors, getAllPlacements } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -793,12 +793,26 @@ export default function RolePage({ role }: { role: RoleKey }) {
     Promise.all([
       getStudents(),
       getMentors(),
+      getAllPlacements(),
     ])
-      .then(async ([students, mentors]) => {
+      .then(async ([students, mentors, allPlacements]) => {
         if (!mounted) return;
 
         const activeStudents = students.filter((s) => s.status.toLowerCase() === "active").length;
         const mentorsActive = mentors.filter((m) => m.status.toLowerCase() === "active").length;
+        
+        // Calculate KPIs from ALL placements
+        const activePlacements = allPlacements.filter((p) => p.status?.toLowerCase() === "active").length;
+        const completedPlacements = allPlacements.filter((p) => p.status?.toLowerCase() === "completed").length;
+
+        const activePlacementWages = allPlacements
+          .filter((p) => p.status?.toLowerCase() === "active")
+          .map((p) => Number(p.hourlyWage) || 0)
+          .filter((n) => Number.isFinite(n) && n > 0);
+
+        const avgHourlyWageActive = activePlacementWages.length
+          ? activePlacementWages.reduce((a, b) => a + b, 0) / activePlacementWages.length
+          : 0;
 
         const selectedStudent = students[0];
 
@@ -806,11 +820,11 @@ export default function RolePage({ role }: { role: RoleKey }) {
           setDatasetState({
             status: "ready",
             kpis: {
-              activePlacements: 0,
-              completedPlacements: 0,
+              activePlacements,
+              completedPlacements,
               activeStudents,
               mentorsActive,
-              avgHourlyWageActive: 0,
+              avgHourlyWageActive,
             },
             selectedStudent: {
               student_id: "—",
@@ -831,23 +845,11 @@ export default function RolePage({ role }: { role: RoleKey }) {
           return;
         }
 
-        const [goals, skills, placements] = await Promise.all([
+        const [goals, skills, studentPlacements] = await Promise.all([
           getStudentGoals(selectedStudent.id),
           getStudentSkills(selectedStudent.id),
           getStudentPlacements(selectedStudent.id),
         ]);
-
-        const activePlacements = placements.filter((p) => p.status?.toLowerCase() === "active").length;
-        const completedPlacements = placements.filter((p) => p.status?.toLowerCase() === "completed").length;
-
-        const activePlacementWages = placements
-          .filter((p) => p.status?.toLowerCase() === "active")
-          .map((p) => Number(p.hourlyWage) || 0)
-          .filter((n) => Number.isFinite(n) && n > 0);
-
-        const avgHourlyWageActive = activePlacementWages.length
-          ? activePlacementWages.reduce((a, b) => a + b, 0) / activePlacementWages.length
-          : 0;
 
         const studentGoals = goals.map((g) => ({
           goal_id: g.id,
@@ -871,7 +873,7 @@ export default function RolePage({ role }: { role: RoleKey }) {
           status: sk.status || "active",
         }));
 
-        const studentPlacements = placements.map((p) => ({
+        const studentPlacementsList = studentPlacements.map((p) => ({
           placement_id: p.id,
           placement_type: p.placementType || "",
           employer_name: p.employerName || "",
@@ -908,7 +910,7 @@ export default function RolePage({ role }: { role: RoleKey }) {
           },
           studentGoals,
           studentSkills,
-          studentPlacements,
+          studentPlacements: studentPlacementsList,
         });
       })
       .catch((e) => {

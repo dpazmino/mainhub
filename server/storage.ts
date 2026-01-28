@@ -47,6 +47,7 @@ export interface IStorage {
   updateStudentSkill(id: string, updates: Partial<InsertStudentSkill>): Promise<StudentSkill | undefined>;
 
   // Placements
+  getAllPlacements(): Promise<Placement[]>;
   getStudentPlacements(studentId: string): Promise<Placement[]>;
   createPlacement(placement: InsertPlacement): Promise<Placement>;
   updatePlacement(id: string, updates: Partial<InsertPlacement>): Promise<Placement | undefined>;
@@ -138,6 +139,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Placements
+  async getAllPlacements(): Promise<Placement[]> {
+    return db.select().from(placements);
+  }
+
   async getStudentPlacements(studentId: string): Promise<Placement[]> {
     return db.select().from(placements).where(eq(placements.studentId, studentId));
   }

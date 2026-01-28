@@ -74,6 +74,10 @@ export async function updateStudentSkill(id: string, updates: Partial<StudentSki
 }
 
 // Placements
+export async function getAllPlacements(): Promise<Placement[]> {
+  return fetchJson<Placement[]>(`/placements`);
+}
+
 export async function getStudentPlacements(studentId: string): Promise<Placement[]> {
   return fetchJson<Placement[]>(`/students/${studentId}/placements`);
 }
