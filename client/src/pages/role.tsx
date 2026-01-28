@@ -100,7 +100,7 @@ function RoleHeader({ role }: { role: RoleKey }) {
 }
 
 interface StudentLookupResult {
-  id: number;
+  id: string;
   studentId: string;
   ageRange: string;
   enrollmentDate: string;
@@ -116,6 +116,9 @@ interface StudentLookupResult {
 function LookupStudentSection({ students, isLoading }: { students: StudentLookupResult[]; isLoading: boolean }) {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedStudent, setSelectedStudent] = React.useState<StudentLookupResult | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   const filteredStudents = React.useMemo(() => {
     if (!searchQuery.trim()) return [];
@@ -130,6 +133,20 @@ function LookupStudentSection({ students, isLoading }: { students: StudentLookup
 
   const handleStudentSelect = (student: StudentLookupResult) => {
     setSelectedStudent(student);
+    setSearchQuery(student.studentId);
+    setIsDropdownOpen(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setSelectedStudent(null);
+    setIsDropdownOpen(true);
+  };
+
+  const handleInputFocus = () => {
+    if (searchQuery.trim() && !selectedStudent) {
+      setIsDropdownOpen(true);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, student: StudentLookupResult) => {
@@ -137,6 +154,23 @@ function LookupStudentSection({ students, isLoading }: { students: StudentLookup
       e.preventDefault();
       handleStudentSelect(student);
     }
+  };
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const clearSelection = () => {
+    setSelectedStudent(null);
+    setSearchQuery("");
+    setIsDropdownOpen(false);
+    inputRef.current?.focus();
   };
 
   if (isLoading) {
@@ -168,88 +202,94 @@ function LookupStudentSection({ students, isLoading }: { students: StudentLookup
           Student Lookup
         </h2>
         <p className="text-sm text-muted-foreground" data-testid="text-lookup-description">
-          Search for students by ID, grade level, or school type
+          Type to search by student ID, name, or grade level
         </p>
       </div>
 
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <div className="relative max-w-md" ref={dropdownRef}>
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
         <Input
+          ref={inputRef}
           type="text"
-          placeholder="Enter student ID or search term..."
+          placeholder="Start typing to search..."
           value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            setSelectedStudent(null);
-          }}
-          className="pl-10 rounded-xl"
+          onChange={handleInputChange}
+          onFocus={handleInputFocus}
+          className="pl-10 pr-10 rounded-xl"
           data-testid="input-student-search"
         />
-      </div>
+        {searchQuery && (
+          <button
+            type="button"
+            onClick={clearSelection}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            data-testid="button-clear-search"
+          >
+            ×
+          </button>
+        )}
 
-      {searchQuery.trim() && (
-        <div className="space-y-3">
-          <p className="text-sm text-muted-foreground" data-testid="text-search-results-count">
-            {filteredStudents.length} result{filteredStudents.length !== 1 ? "s" : ""} found
-          </p>
-
-          {filteredStudents.length > 0 && (
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3" role="listbox" aria-label="Student search results">
-              {filteredStudents.slice(0, 12).map((student) => (
+        {isDropdownOpen && searchQuery.trim() && !selectedStudent && (
+          <div
+            className="absolute z-20 mt-1 w-full rounded-xl border border-border bg-white shadow-lg max-h-64 overflow-y-auto"
+            role="listbox"
+            aria-label="Student search results"
+            data-testid="dropdown-student-results"
+          >
+            {filteredStudents.length > 0 ? (
+              filteredStudents.slice(0, 10).map((student) => (
                 <div
                   key={student.id}
                   role="option"
-                  aria-selected={selectedStudent?.id === student.id}
+                  aria-selected={false}
                   tabIndex={0}
-                  className={`rounded-2xl cursor-pointer transition-all hover:shadow-md border p-4 ${
-                    selectedStudent?.id === student.id
-                      ? "ring-2 ring-primary bg-primary/5 border-primary/30"
-                      : "bg-white/70 border-border/70"
-                  }`}
+                  className="px-4 py-3 cursor-pointer hover:bg-gray-50 border-b border-border/50 last:border-b-0 transition-colors"
                   onClick={() => handleStudentSelect(student)}
                   onKeyDown={(e) => handleKeyDown(e, student)}
-                  data-testid={`card-student-result-${student.id}`}
+                  data-testid={`dropdown-item-${student.id}`}
                 >
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <div className="font-medium" data-testid={`text-student-id-${student.id}`}>
-                        {student.studentId}
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {student.gradeLevel} · {student.schoolType}
+                      <div className="font-medium text-sm">{student.studentId}</div>
+                      <div className="text-xs text-muted-foreground">
+                        Grade {student.gradeLevel} · {student.schoolType} · {student.ageRange}
                       </div>
                     </div>
                     <Badge
                       variant={student.status.toLowerCase() === "active" ? "default" : "secondary"}
                       className="text-xs"
-                      data-testid={`badge-student-status-${student.id}`}
                     >
                       {student.status}
                     </Badge>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-
-          {filteredStudents.length === 0 && (
-            <Card className="rounded-2xl bg-white/70 border-border/70">
-              <CardContent className="p-6 text-center">
-                <p className="text-muted-foreground" data-testid="text-no-results">
-                  No students found matching "{searchQuery}"
-                </p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
+              ))
+            ) : (
+              <div className="px-4 py-3 text-sm text-muted-foreground" data-testid="dropdown-no-results">
+                No students found matching "{searchQuery}"
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {selectedStudent && (
         <Card className="rounded-2xl bg-white/70 border-border/70 shadow-sm">
           <CardHeader className="pb-2">
-            <h3 className="text-base font-semibold" data-testid="text-selected-student-title">
-              Student Details
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-semibold" data-testid="text-selected-student-title">
+                Student Details: {selectedStudent.studentId}
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearSelection}
+                className="text-muted-foreground hover:text-foreground"
+                data-testid="button-close-details"
+              >
+                Search another
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="pt-0">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -944,20 +984,20 @@ export default function RolePage({ role }: { role: RoleKey }) {
         // Store all students for lookup feature
         setAllStudents(students.map((s) => ({
           id: s.id,
-          studentId: s.studentId,
-          ageRange: s.ageRange,
-          enrollmentDate: s.enrollmentDate,
-          gradeLevel: s.gradeLevel,
-          schoolType: s.schoolType,
-          primaryLanguage: s.primaryLanguage,
-          transportationNeeds: s.transportationNeeds,
-          hasIep: s.hasIep,
-          photoConsent: s.photoConsent,
-          status: s.status,
+          studentId: s.id,
+          ageRange: s.ageRange || "",
+          enrollmentDate: s.enrollmentDate || "",
+          gradeLevel: s.gradeLevel || "",
+          schoolType: s.schoolType || "",
+          primaryLanguage: s.primaryLanguage || "",
+          transportationNeeds: s.transportationNeeds || false,
+          hasIep: s.hasIep || false,
+          photoConsent: s.photoConsent || false,
+          status: s.status || "",
         })));
 
-        const activeStudents = students.filter((s) => s.status.toLowerCase() === "active").length;
-        const mentorsActive = mentors.filter((m) => m.status.toLowerCase() === "active").length;
+        const activeStudents = students.filter((s) => (s.status || "").toLowerCase() === "active").length;
+        const mentorsActive = mentors.filter((m) => (m.status || "").toLowerCase() === "active").length;
         
         // Calculate KPIs from ALL placements
         const activePlacements = allPlacements.filter((p) => p.status?.toLowerCase() === "active").length;
