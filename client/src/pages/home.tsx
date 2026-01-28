@@ -1,7 +1,6 @@
 import * as React from "react";
 import { Link } from "wouter";
 import {
-  BarChart3,
   BookOpen,
   GraduationCap,
   Handshake,
@@ -12,10 +11,10 @@ import {
   Users,
 } from "lucide-react";
 
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type RoleKey = "student" | "staff" | "experience";
 
