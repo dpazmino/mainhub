@@ -763,6 +763,75 @@ function StudentPanel({
                   ))}
                 </div>
               )}
+
+              {(datasetState.progressData.timeline?.length ?? 0) > 0 && (
+                <div className="space-y-0" data-testid="waterfall-timeline-container">
+                  <div className="text-xs font-medium text-muted-foreground mb-2">Journey Milestones</div>
+                  {datasetState.progressData.timeline.map((item, index) => (
+                    <div key={item.id} className="relative flex gap-4" data-testid={`waterfall-item-${item.id}`}>
+                      <div className="flex flex-col items-center">
+                        <div
+                          className={`z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 ${
+                            item.status === "completed"
+                              ? "border-green-500 bg-green-50 text-green-600"
+                              : item.status === "in_progress"
+                              ? "border-blue-500 bg-blue-50 text-blue-600"
+                              : "border-gray-300 bg-gray-50 text-gray-400"
+                          }`}
+                          data-testid={`waterfall-dot-${item.id}`}
+                        >
+                          {item.type === "enrollment" && <GraduationCap className="h-4 w-4" />}
+                          {item.type === "goal" && <ClipboardList className="h-4 w-4" />}
+                          {item.type === "skill" && <TrendingUp className="h-4 w-4" />}
+                          {item.type === "placement" && <Briefcase className="h-4 w-4" />}
+                          {item.type === "milestone" && <BadgeCheck className="h-4 w-4" />}
+                        </div>
+                        {index < (datasetState.progressData?.timeline?.length ?? 0) - 1 && (
+                          <div
+                            className={`w-0.5 flex-1 ${
+                              item.status === "completed" ? "bg-green-300" : "bg-gray-200"
+                            }`}
+                            style={{ minHeight: "2rem" }}
+                          />
+                        )}
+                      </div>
+                      <div className="flex-1 pb-4">
+                        <div className="rounded-2xl border border-border bg-white/60 p-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium truncate" data-testid={`waterfall-title-${item.id}`}>
+                                {item.title}
+                              </div>
+                              <div className="mt-1 text-xs text-muted-foreground">
+                                {item.description}
+                              </div>
+                            </div>
+                            <Badge
+                              variant="secondary"
+                              className={`rounded-full text-[10px] shrink-0 ${
+                                item.status === "completed"
+                                  ? "bg-green-100 text-green-700"
+                                  : item.status === "in_progress"
+                                  ? "bg-blue-100 text-blue-700"
+                                  : "bg-gray-100 text-gray-600"
+                              }`}
+                            >
+                              {item.status === "completed" ? "Done" : item.status === "in_progress" ? "Active" : "Upcoming"}
+                            </Badge>
+                          </div>
+                          <div className="mt-2 text-[10px] text-muted-foreground">
+                            {new Date(item.date).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </CardContent>

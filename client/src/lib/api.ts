@@ -122,6 +122,15 @@ export interface RecentProgressItem {
   completedAt: string;
 }
 
+export interface TimelineItem {
+  id: string;
+  date: string;
+  title: string;
+  description: string;
+  type: "enrollment" | "goal" | "skill" | "placement" | "milestone";
+  status: "completed" | "in_progress" | "upcoming";
+}
+
 export interface StudentProgressData {
   user: {
     id: string;
@@ -138,6 +147,7 @@ export interface StudentProgressData {
   progressPercent: number;
   currentWeek: number;
   recentProgress: RecentProgressItem[];
+  timeline: TimelineItem[];
   achievements: string[];
 }
 
