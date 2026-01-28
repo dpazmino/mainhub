@@ -797,8 +797,8 @@ export default function RolePage({ role }: { role: RoleKey }) {
       .then(async ([students, mentors]) => {
         if (!mounted) return;
 
-        const activeStudents = students.filter((s) => s.status === "active").length;
-        const mentorsActive = mentors.filter((m) => m.status === "active").length;
+        const activeStudents = students.filter((s) => s.status.toLowerCase() === "active").length;
+        const mentorsActive = mentors.filter((m) => m.status.toLowerCase() === "active").length;
 
         const selectedStudent = students[0];
 
@@ -837,11 +837,11 @@ export default function RolePage({ role }: { role: RoleKey }) {
           getStudentPlacements(selectedStudent.id),
         ]);
 
-        const activePlacements = placements.filter((p) => p.status === "active").length;
-        const completedPlacements = placements.filter((p) => p.status === "completed").length;
+        const activePlacements = placements.filter((p) => p.status?.toLowerCase() === "active").length;
+        const completedPlacements = placements.filter((p) => p.status?.toLowerCase() === "completed").length;
 
         const activePlacementWages = placements
-          .filter((p) => p.status === "active")
+          .filter((p) => p.status?.toLowerCase() === "active")
           .map((p) => Number(p.hourlyWage) || 0)
           .filter((n) => Number.isFinite(n) && n > 0);
 
