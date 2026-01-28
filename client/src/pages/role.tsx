@@ -911,41 +911,37 @@ export default function RolePage({ role }: { role: RoleKey }) {
   }, []);
 
   return (
-    <div className="min-h-screen by-noise">
-      <div className="absolute inset-0 by-shimmer" />
-      <div className="absolute inset-0 by-grid opacity-[0.55]" />
-
-      <div className="relative mx-auto w-full max-w-6xl px-5 md:px-8">
-        <div className="pt-6 flex items-center justify-between gap-4">
-          <Link href="/">
-            <Button
-              variant="secondary"
-              className="rounded-full bg-white/70 border border-border hover:bg-white"
-              data-testid="button-back-home"
-            >
-              Back
-            </Button>
-          </Link>
-
+    <div>
+      <div className="flex items-center justify-between gap-4" data-testid="row-role-top-actions">
+        <Link href="/">
           <Button
             variant="secondary"
             className="rounded-full bg-white/70 border border-border hover:bg-white"
-            onClick={() => setLocation("/")}
-            data-testid="button-switch-role"
+            data-testid="button-back-home"
           >
-            Switch role
+            Back
           </Button>
-        </div>
+        </Link>
 
-        <div className="pt-8">
-          <RoleHeader role={role} />
-        </div>
+        <Button
+          variant="secondary"
+          className="rounded-full bg-white/70 border border-border hover:bg-white"
+          onClick={() => setLocation("/")}
+          data-testid="button-switch-role"
+        >
+          Switch role
+        </Button>
+      </div>
 
-        <div className="pt-6">
-          <QuickActions role={role} />
-        </div>
+      <div className="pt-8">
+        <RoleHeader role={role} />
+      </div>
 
-        {role === "staff" ? (
+      <div className="pt-6">
+        <QuickActions role={role} />
+      </div>
+
+      {role === "staff" ? (
           <div className="pt-6">
             <div className="grid gap-3 md:grid-cols-5">
               <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
@@ -1021,12 +1017,12 @@ export default function RolePage({ role }: { role: RoleKey }) {
           </div>
         ) : null}
 
-        <div className="pt-8 pb-10">
-          <Tabs defaultValue="overview" className="w-full" data-testid="tabs-role">
-            <TabsList
-              className="w-full justify-start gap-1 rounded-2xl bg-white/60 border border-border p-1"
-              data-testid="tabslist-role"
-            >
+      <div className="pt-8 pb-2">
+        <Tabs defaultValue="overview" className="w-full" data-testid="tabs-role">
+          <TabsList
+            className="w-full justify-start gap-1 rounded-2xl bg-white/60 border border-border p-1"
+            data-testid="tabslist-role"
+          >
               <TabsTrigger className="rounded-xl" value="overview" data-testid="tab-overview">
                 Overview
               </TabsTrigger>
@@ -1212,7 +1208,6 @@ export default function RolePage({ role }: { role: RoleKey }) {
             </TabsContent>
           </Tabs>
         </div>
-      </div>
     </div>
   );
 }
