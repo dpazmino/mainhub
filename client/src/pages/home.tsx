@@ -322,6 +322,59 @@ function About() {
   );
 }
 
+function RoleSelection() {
+  return (
+    <section id="roles" className="pt-10 md:pt-14" data-testid="section-roles">
+      <h2 className="font-serif text-2xl md:text-3xl tracking-tight" data-testid="text-roles-title">
+        Choose Your Role
+      </h2>
+      <p className="mt-3 text-sm md:text-base text-muted-foreground max-w-2xl" data-testid="text-roles-subtitle">
+        Select your role to access the personalized dashboard with features tailored to your needs.
+      </p>
+
+      <div className="mt-6 grid gap-4 md:grid-cols-3" data-testid="grid-roles">
+        {(Object.keys(roleConfig) as RoleKey[]).map((key) => {
+          const role = roleConfig[key];
+          return (
+            <Link key={key} href={role.href}>
+              <Card
+                className="group cursor-pointer rounded-3xl border-border/70 bg-white/75 backdrop-blur supports-[backdrop-filter]:bg-white/55 shadow-sm hover:shadow-md hover:bg-white/90 transition-all duration-200"
+                data-testid={`card-role-${key}`}
+              >
+                <div className="p-5">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-xl bg-[hsl(var(--primary)/0.12)] p-2.5 group-hover:bg-[hsl(var(--primary)/0.18)] transition-colors">
+                      {role.icon}
+                    </div>
+                    <div className="text-base font-semibold" data-testid={`text-role-${key}-title`}>
+                      {role.title}
+                    </div>
+                  </div>
+                  <p className="mt-3 text-sm text-muted-foreground" data-testid={`text-role-${key}-desc`}>
+                    {role.subtitle}
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {role.chips.map((chip, i) => (
+                      <Badge
+                        key={i}
+                        variant="secondary"
+                        className="rounded-full bg-white/70 border border-border text-xs"
+                        data-testid={`badge-role-${key}-chip-${i}`}
+                      >
+                        {chip}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function Footer() {
   return (
     <footer className="py-10">
@@ -356,6 +409,7 @@ export default function HomePage() {
 
         <Hero />
         <About />
+        <RoleSelection />
         <Footer />
       </div>
     </div>
