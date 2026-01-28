@@ -1,0 +1,52 @@
+
+Comprehensive Prompt to Build a Multi‑Persona Platform Interface
+Build a digital platform that supports three primary personas: (1) Staff & Administrative Users, (2) Students, and (3) Experience‑Journey Users (e.g., mentors, alumni, partners).
+The system should present tailored interfaces and permissions based on user profile type (full‑time, part‑time, facilitator, student, alumni, mentor, or partner).
+
+1. Staff & Administrative Persona Interface
+General Access Rules:
+	• Access is determined by employment type (full‑time, part‑time, facilitator).
+	• All staff personas must access the learning platform.
+Full‑Time Staff Capabilities
+	• Administrative dashboard with:
+		○ CRM access
+		○ Device management tools
+		○ Full visibility into personal profiles, including:
+			§ Alumni
+			§ Current students
+			§ Submitted applications
+		○ Program KPI analytics, including:
+			§ Completed programs
+			§ Returning program participants
+			§ Program types
+			§ Job placement metrics (how many secure full‑time roles and time‑to‑hire)
+		○ Learning platform access
+Part‑Time Staff Capabilities
+	• Device management
+	• Learning platform access
+Facilitator Capabilities
+	• Access to learning sessions
+	• Cohort information dashboard
+2. Student Persona Interface
+Create a student‑centric interface that provides:
+	• Assessment tools, including:
+		○ Skill‑level evaluations
+		○ Resource‑needs analysis
+	• Learning platform access with tailored modules and progress tracking
+3. Experience‑Journey Persona Interface
+Include interfaces and journeys for:
+	• Mentors
+	• Partnership collaborators (including NEON CRM founder and similar stakeholders)
+	• Alumni, including:
+		○ Returning alumni journeys
+		○ Job‑seeking support and job‑secured tracking
+Overall Platform Requirements
+Your build should:
+	• Provide a clean, intuitive, role‑based interface for all persona types
+	• Support conditional access levels depending on user category
+	• Offer dashboards, analytics, learning tools, and engagement flows appropriate to each persona
+	• Integrate CRM, learning platforms, and device management tools
+	• Support end‑to‑end journeys from student entry → program participation → alumni engagement → workforce outcomes
+	• Use look and feel layout from https://www.betteryouth.org/ use about information from here
+
+Profile options on menu on left which allows student, staff.
