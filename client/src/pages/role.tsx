@@ -16,7 +16,7 @@ import {
   Users,
 } from "lucide-react";
 
-import { getStudents, getStudentGoals, getStudentSkills, getStudentPlacements, getMentors, getAllPlacements } from "@/lib/api";
+import { getStudents, getStudentGoals, getStudentSkills, getStudentPlacements, getMentors, getAllPlacements, getStudentProgress, type ProgressTimelineItem } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -458,6 +458,7 @@ function StudentPanel({
           performance_rating: string;
           status: string;
         }[];
+        progressTimeline: ProgressTimelineItem[];
       }
     | { status: "error"; message: string };
 }) {
@@ -674,6 +675,94 @@ function StudentPanel({
             <div className="mt-1 text-sm font-medium" data-testid="text-student-placements-count-value">
               {placements.length}
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm lg:col-span-2">
+        <CardHeader className="pb-2">
+          <div className="text-sm font-medium" data-testid="text-student-timeline-title">
+            Progress Timeline
+          </div>
+          <div className="text-sm text-muted-foreground" data-testid="text-student-timeline-subtitle">
+            Your journey milestones in order.
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="relative" data-testid="timeline-container">
+            {datasetState.progressTimeline.length === 0 ? (
+              <div className="text-sm text-muted-foreground" data-testid="text-timeline-empty">
+                No progress events yet.
+              </div>
+            ) : (
+              <div className="space-y-0">
+                {datasetState.progressTimeline.map((item, index) => (
+                  <div key={item.id} className="relative flex gap-4" data-testid={`timeline-item-${item.id}`}>
+                    <div className="flex flex-col items-center">
+                      <div
+                        className={`z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 ${
+                          item.status === "completed"
+                            ? "border-green-500 bg-green-50 text-green-600"
+                            : item.status === "in_progress"
+                            ? "border-blue-500 bg-blue-50 text-blue-600"
+                            : "border-gray-300 bg-gray-50 text-gray-400"
+                        }`}
+                        data-testid={`timeline-dot-${item.id}`}
+                      >
+                        {item.type === "enrollment" && <GraduationCap className="h-4 w-4" />}
+                        {item.type === "goal" && <ClipboardList className="h-4 w-4" />}
+                        {item.type === "skill" && <TrendingUp className="h-4 w-4" />}
+                        {item.type === "placement" && <Briefcase className="h-4 w-4" />}
+                        {item.type === "milestone" && <BadgeCheck className="h-4 w-4" />}
+                      </div>
+                      {index < datasetState.progressTimeline.length - 1 && (
+                        <div
+                          className={`w-0.5 flex-1 ${
+                            item.status === "completed" ? "bg-green-300" : "bg-gray-200"
+                          }`}
+                          style={{ minHeight: "2rem" }}
+                          data-testid={`timeline-line-${item.id}`}
+                        />
+                      )}
+                    </div>
+                    <div className="flex-1 pb-6">
+                      <div className="rounded-2xl border border-border bg-white/60 p-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium truncate" data-testid={`timeline-title-${item.id}`}>
+                              {item.title}
+                            </div>
+                            <div className="mt-1 text-xs text-muted-foreground" data-testid={`timeline-desc-${item.id}`}>
+                              {item.description}
+                            </div>
+                          </div>
+                          <Badge
+                            variant="secondary"
+                            className={`rounded-full text-[10px] shrink-0 ${
+                              item.status === "completed"
+                                ? "bg-green-100 text-green-700"
+                                : item.status === "in_progress"
+                                ? "bg-blue-100 text-blue-700"
+                                : "bg-gray-100 text-gray-600"
+                            }`}
+                            data-testid={`timeline-status-${item.id}`}
+                          >
+                            {item.status === "completed" ? "Done" : item.status === "in_progress" ? "Active" : "Upcoming"}
+                          </Badge>
+                        </div>
+                        <div className="mt-2 text-[10px] text-muted-foreground" data-testid={`timeline-date-${item.id}`}>
+                          {new Date(item.date).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -965,6 +1054,7 @@ export default function RolePage({ role }: { role: RoleKey }) {
           performance_rating: string;
           status: string;
         }[];
+        progressTimeline: ProgressTimelineItem[];
       }
     | { status: "error"; message: string }
   >({ status: "loading" });
@@ -1038,14 +1128,16 @@ export default function RolePage({ role }: { role: RoleKey }) {
             studentGoals: [],
             studentSkills: [],
             studentPlacements: [],
+            progressTimeline: [],
           });
           return;
         }
 
-        const [goals, skills, studentPlacements] = await Promise.all([
+        const [goals, skills, studentPlacements, progressTimeline] = await Promise.all([
           getStudentGoals(selectedStudent.id),
           getStudentSkills(selectedStudent.id),
           getStudentPlacements(selectedStudent.id),
+          getStudentProgress(selectedStudent.id),
         ]);
 
         const studentGoals = goals.map((g) => ({
@@ -1108,6 +1200,7 @@ export default function RolePage({ role }: { role: RoleKey }) {
           studentGoals,
           studentSkills,
           studentPlacements: studentPlacementsList,
+          progressTimeline,
         });
       })
       .catch((e) => {

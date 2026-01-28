@@ -197,6 +197,83 @@ export async function registerRoutes(
     }
   });
 
+  // Student progress timeline
+  app.get("/api/students/:studentId/progress", async (req, res) => {
+    try {
+      const studentId = req.params.studentId;
+      const goals = await storage.getStudentGoals(studentId);
+      const skills = await storage.getStudentSkills(studentId);
+      const placements = await storage.getStudentPlacements(studentId);
+      const student = await storage.getStudent(studentId);
+      
+      const timeline: Array<{
+        id: string;
+        date: string;
+        title: string;
+        description: string;
+        type: "enrollment" | "goal" | "skill" | "placement" | "milestone";
+        status: "completed" | "in_progress" | "upcoming";
+      }> = [];
+
+      if (student && student.enrollmentDate) {
+        timeline.push({
+          id: `enroll-${studentId}`,
+          date: student.enrollmentDate,
+          title: "Enrolled in Better Youth",
+          description: `Started journey as ${student.ageRange || "youth"} student`,
+          type: "enrollment",
+          status: "completed",
+        });
+      }
+
+      for (const goal of goals) {
+        if (goal.startDate) {
+          timeline.push({
+            id: `goal-${goal.id}`,
+            date: goal.startDate,
+            title: goal.goalTitle || "Goal",
+            description: `${goal.goalType || "General"} goal • ${goal.progressPercentage || 0}% complete`,
+            type: "goal",
+            status: goal.status === "Completed" ? "completed" : goal.status === "On Track" ? "in_progress" : "upcoming",
+          });
+        }
+      }
+
+      for (const skill of skills) {
+        if (skill.initialAssessmentDate) {
+          timeline.push({
+            id: `skill-${skill.id}`,
+            date: skill.initialAssessmentDate,
+            title: `Skill Assessment: ${skill.skillName || "Skill"}`,
+            description: `${skill.initialProficiencyLevel || "Start"} → ${skill.currentProficiencyLevel || "Current"}`,
+            type: "skill",
+            status: skill.status === "Active" ? "in_progress" : "completed",
+          });
+        }
+      }
+
+      for (const placement of placements) {
+        if (placement.startDate) {
+          timeline.push({
+            id: `placement-${placement.id}`,
+            date: placement.startDate,
+            title: `${placement.jobTitle || "Position"} at ${placement.employerName || "Employer"}`,
+            description: `${placement.placementType || "Placement"} • ${placement.industry || "Industry"}`,
+            type: "placement",
+            status: placement.isCurrent ? "in_progress" : "completed",
+          });
+        }
+      }
+
+      timeline.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+      res.json(timeline);
+    } catch (error) {
+      console.error("Error fetching student progress:", error);
+      res.status(500).json({ error: "Failed to fetch student progress" });
+    }
+  });
+
   // Mentors routes
   app.get("/api/mentors", async (req, res) => {
     try {

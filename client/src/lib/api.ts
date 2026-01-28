@@ -109,3 +109,17 @@ export async function getMentors(): Promise<Mentor[]> {
 export async function getMentor(id: string): Promise<Mentor> {
   return fetchJson<Mentor>(`/mentors/${id}`);
 }
+
+// Student Progress Timeline
+export interface ProgressTimelineItem {
+  id: string;
+  date: string;
+  title: string;
+  description: string;
+  type: "enrollment" | "goal" | "skill" | "placement" | "milestone";
+  status: "completed" | "in_progress" | "upcoming";
+}
+
+export async function getStudentProgress(studentId: string): Promise<ProgressTimelineItem[]> {
+  return fetchJson<ProgressTimelineItem[]>(`/students/${studentId}/progress`);
+}
