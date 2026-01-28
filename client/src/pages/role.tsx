@@ -603,24 +603,6 @@ export default function RolePage({ role }: { role: RoleKey }) {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <div className="text-xs text-muted-foreground" data-testid="text-kpi-active-placements-label">
-                        Active placements
-                      </div>
-                      <div className="mt-1 text-2xl font-semibold" data-testid="text-kpi-active-placements-value">
-                        {datasetState.status === "ready" ? datasetState.kpis.activePlacements : "\u2014"}
-                      </div>
-                    </div>
-                    <div className="rounded-2xl bg-[hsl(var(--accent)/0.12)] p-2">
-                      <Briefcase className="h-4 w-4 text-[hsl(var(--accent))]" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
                       <div className="text-xs text-muted-foreground" data-testid="text-kpi-completed-placements-label">
                         Completed placements
                       </div>
@@ -630,24 +612,6 @@ export default function RolePage({ role }: { role: RoleKey }) {
                     </div>
                     <div className="rounded-2xl bg-[hsl(261_78%_62%/0.12)] p-2">
                       <BadgeCheck className="h-4 w-4 text-[hsl(261_78%_62%)]" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <div className="text-xs text-muted-foreground" data-testid="text-kpi-avg-wage-label">
-                        Avg wage (active)
-                      </div>
-                      <div className="mt-1 text-2xl font-semibold" data-testid="text-kpi-avg-wage-value">
-                        {datasetState.status === "ready" ? `$${datasetState.kpis.avgHourlyWageActive.toFixed(2)}` : "\u2014"}
-                      </div>
-                    </div>
-                    <div className="rounded-2xl bg-[hsl(var(--primary)/0.12)] p-2">
-                      <TrendingUp className="h-4 w-4 text-[hsl(var(--primary))]" />
                     </div>
                   </div>
                 </CardContent>
