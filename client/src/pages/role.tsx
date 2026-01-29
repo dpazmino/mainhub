@@ -598,8 +598,36 @@ const servicesByCategory: Record<string, string[]> = {
   ],
 };
 
+interface ExternalStudentData {
+  studentId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  enrolledAt: string;
+  totalWeeks: number;
+  completedWeeks: number;
+  completionPercentage: number;
+  lastActivityAt: string;
+  weeklyProgress: { week: number; completed: boolean; completedAt?: string }[];
+  gamification: {
+    totalXP: number;
+    level: number;
+    xpToNextLevel: number;
+    xpProgress: number;
+    badges: { id: string; name: string; description: string; icon: string; xpBonus: number; earnedAt: string }[];
+    recentBadges: { id: string; name: string; description: string; icon: string; xpBonus: number; earnedAt: string }[];
+  };
+}
+
 function QuickActions({ role, studentId, onNavigate }: { role: RoleKey; studentId?: string; onNavigate?: (tab: string) => void }) {
   const [supportModalOpen, setSupportModalOpen] = React.useState(false);
+  const [learningPathModalOpen, setLearningPathModalOpen] = React.useState(false);
+  const [learningPathData, setLearningPathData] = React.useState<
+    | { status: "idle" }
+    | { status: "loading" }
+    | { status: "ready"; data: ExternalStudentData }
+    | { status: "error"; message: string }
+  >({ status: "idle" });
   const [supportForm, setSupportForm] = React.useState({
     serviceCategory: "",
     serviceName: "",
@@ -613,6 +641,22 @@ function QuickActions({ role, studentId, onNavigate }: { role: RoleKey; studentI
   const availableServices = supportForm.serviceCategory
     ? servicesByCategory[supportForm.serviceCategory] || []
     : [];
+
+  const handleViewLearningPath = async () => {
+    setLearningPathModalOpen(true);
+    setLearningPathData({ status: "loading" });
+    try {
+      const response = await fetch("https://unity-code-academy.replit.app/api/v1/students");
+      const result = await response.json();
+      if (result.success && result.data && result.data.length > 0) {
+        setLearningPathData({ status: "ready", data: result.data[0] });
+      } else {
+        setLearningPathData({ status: "error", message: "No student data found" });
+      }
+    } catch (error) {
+      setLearningPathData({ status: "error", message: "Failed to load learning path data" });
+    }
+  };
 
   const handleCategoryChange = (category: string) => {
     setSupportForm(prev => ({
@@ -655,7 +699,7 @@ function QuickActions({ role, studentId, onNavigate }: { role: RoleKey; studentI
   const actions: Record<RoleKey, { label: string; icon: React.ReactNode; onClick?: () => void }[]> = {
     student: [
       { label: "Take skill check", icon: <ClipboardList className="h-4 w-4" /> },
-      { label: "View learning path", icon: <BookOpen className="h-4 w-4" /> },
+      { label: "View learning path", icon: <BookOpen className="h-4 w-4" />, onClick: handleViewLearningPath },
       { label: "Update support needs", icon: <Users className="h-4 w-4" />, onClick: () => setSupportModalOpen(true) },
     ],
     staff: [
@@ -816,6 +860,154 @@ function QuickActions({ role, studentId, onNavigate }: { role: RoleKey; studentI
               data-testid="button-submit-request"
             >
               {isSubmitting ? "Submitting..." : "Submit Request"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={learningPathModalOpen} onOpenChange={setLearningPathModalOpen}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto" data-testid="dialog-learning-path">
+          <DialogHeader>
+            <DialogTitle data-testid="dialog-learning-path-title">Your Learning Path</DialogTitle>
+            <DialogDescription data-testid="dialog-learning-path-description">
+              Track your progress, achievements, and earned badges.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {learningPathData.status === "loading" && (
+            <div className="py-8 text-center text-muted-foreground" data-testid="learning-path-loading">
+              Loading your learning path...
+            </div>
+          )}
+
+          {learningPathData.status === "error" && (
+            <div className="py-8 text-center text-red-600" data-testid="learning-path-error">
+              {learningPathData.message}
+            </div>
+          )}
+
+          {learningPathData.status === "ready" && (
+            <div className="space-y-6" data-testid="learning-path-content">
+              <div className="text-center">
+                <div className="text-lg font-semibold" data-testid="learning-path-name">
+                  {learningPathData.data.firstName} {learningPathData.data.lastName}
+                </div>
+                <div className="text-sm text-muted-foreground">Student ID: {learningPathData.data.studentId}</div>
+              </div>
+
+              <Card className="rounded-2xl bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+                <CardHeader className="pb-2">
+                  <div className="text-sm font-medium text-purple-700">Gamification Stats</div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div className="text-center" data-testid="gamification-level">
+                      <div className="text-2xl font-bold text-purple-600">Level {learningPathData.data.gamification.level}</div>
+                      <div className="text-xs text-muted-foreground">Current Level</div>
+                    </div>
+                    <div className="text-center" data-testid="gamification-xp">
+                      <div className="text-2xl font-bold text-blue-600">{learningPathData.data.gamification.totalXP}</div>
+                      <div className="text-xs text-muted-foreground">Total XP</div>
+                    </div>
+                    <div className="text-center" data-testid="gamification-next-level">
+                      <div className="text-2xl font-bold text-green-600">{learningPathData.data.gamification.xpToNextLevel}</div>
+                      <div className="text-xs text-muted-foreground">XP to Next Level</div>
+                    </div>
+                    <div className="text-center" data-testid="gamification-progress">
+                      <div className="text-2xl font-bold text-orange-600">{learningPathData.data.gamification.xpProgress}%</div>
+                      <div className="text-xs text-muted-foreground">Level Progress</div>
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <Progress value={learningPathData.data.gamification.xpProgress} className="h-2" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl bg-white/70 border-border/70">
+                <CardHeader className="pb-2">
+                  <div className="text-sm font-medium">Course Progress</div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div data-testid="course-weeks-completed">
+                      <div className="text-xl font-bold text-primary">{learningPathData.data.completedWeeks}/{learningPathData.data.totalWeeks}</div>
+                      <div className="text-xs text-muted-foreground">Weeks Completed</div>
+                    </div>
+                    <div data-testid="course-completion">
+                      <div className="text-xl font-bold text-green-600">{learningPathData.data.completionPercentage}%</div>
+                      <div className="text-xs text-muted-foreground">Complete</div>
+                    </div>
+                    <div data-testid="course-last-activity">
+                      <div className="text-xl font-bold text-blue-600">
+                        {new Date(learningPathData.data.lastActivityAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Last Active</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {learningPathData.data.gamification.badges.length > 0 && (
+                <Card className="rounded-2xl bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
+                  <CardHeader className="pb-2">
+                    <div className="text-sm font-medium text-yellow-700">Earned Badges</div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-3">
+                      {learningPathData.data.gamification.badges.map((badge) => (
+                        <div key={badge.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/80" data-testid={`badge-${badge.id}`}>
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100 text-yellow-600">
+                            <BadgeCheck className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm">{badge.name}</div>
+                            <div className="text-xs text-muted-foreground truncate">{badge.description}</div>
+                          </div>
+                          <Badge variant="secondary" className="bg-yellow-100 text-yellow-700 text-xs">
+                            +{badge.xpBonus} XP
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {learningPathData.data.weeklyProgress.length > 0 && (
+                <Card className="rounded-2xl bg-white/70 border-border/70">
+                  <CardHeader className="pb-2">
+                    <div className="text-sm font-medium">Weekly Progress</div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {learningPathData.data.weeklyProgress.map((week) => (
+                        <div
+                          key={week.week}
+                          className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium ${
+                            week.completed
+                              ? "bg-green-100 text-green-700 border border-green-300"
+                              : "bg-gray-100 text-gray-500 border border-gray-200"
+                          }`}
+                          data-testid={`week-${week.week}`}
+                        >
+                          {week.week}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setLearningPathModalOpen(false)}
+              data-testid="button-close-learning-path"
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
