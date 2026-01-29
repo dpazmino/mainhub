@@ -1,9 +1,5 @@
-import * as React from "react";
 import { Link } from "wouter";
 import {
-  Cloud,
-  Copy,
-  Download,
   ExternalLink,
   GraduationCap,
   Handshake,
@@ -17,39 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-const appRepos = [
-  {
-    name: "Better Youth Hub",
-    replitUrl: "https://replit.com/@davidpazmino1/attached-assets",
-    description: "Main hub with role-based dashboards",
-  },
-  {
-    name: "Youth Connect",
-    replitUrl: "https://replit.com/@davidpazmino1/youth-connect",
-    description: "Onboarding and engagement platform",
-  },
-  {
-    name: "Azure Connect",
-    replitUrl: "https://replit.com/@davidpazmino1/azure-connect",
-    description: "Azure integration and services",
-  },
-  {
-    name: "Unity Code Academy",
-    replitUrl: "https://replit.com/@davidpazmino1/unity-code-academy",
-    description: "Gamified learning platform",
-  },
-];
 
 type RoleKey = "student" | "staff" | "experience";
 
@@ -167,138 +131,16 @@ function TopBar() {
             </div>
           </PopoverContent>
         </Popover>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              variant="secondary"
-              className="rounded-full bg-white/70 border border-border hover:bg-white gap-2 text-sm"
-              data-testid="button-deploy-guide"
-            >
-              <Rocket className="h-4 w-4" />
-              Deploy Guide
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Rocket className="h-5 w-5" />
-                Deploy These Apps
-              </DialogTitle>
-              <DialogDescription>
-                Learn how to deploy Better Youth apps to your own domain or download the code for self-hosting.
-              </DialogDescription>
-            </DialogHeader>
-            <Tabs defaultValue="replit" className="mt-4">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="replit" className="gap-2">
-                  <Cloud className="h-4 w-4" />
-                  Deploy on Replit
-                </TabsTrigger>
-                <TabsTrigger value="self-host" className="gap-2">
-                  <Download className="h-4 w-4" />
-                  Self-Host
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="replit" className="mt-4 space-y-4">
-                <div className="rounded-lg border bg-muted/30 p-4">
-                  <h4 className="font-semibold text-sm">Option 1: Fork and Deploy</h4>
-                  <ol className="mt-3 space-y-2 text-sm text-muted-foreground list-decimal list-inside">
-                    <li>Click on any app link below to open it in Replit</li>
-                    <li>Click the <strong>"Fork"</strong> button to create your own copy</li>
-                    <li>Make any customizations you need</li>
-                    <li>Click <strong>"Publish"</strong> to deploy to a .replit.app domain</li>
-                  </ol>
-                </div>
-                <div className="rounded-lg border bg-muted/30 p-4">
-                  <h4 className="font-semibold text-sm">Option 2: Custom Domain</h4>
-                  <ol className="mt-3 space-y-2 text-sm text-muted-foreground list-decimal list-inside">
-                    <li>After publishing, go to the <strong>Deployments</strong> tab</li>
-                    <li>Click <strong>"Link Custom Domain"</strong></li>
-                    <li>Add the DNS records (A and TXT) to your domain registrar</li>
-                    <li>Wait for DNS propagation (usually 15 min - 24 hrs)</li>
-                  </ol>
-                  <p className="mt-3 text-xs text-muted-foreground">
-                    You can also purchase a domain directly through Replit for automatic configuration.
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-sm">App Repositories</h4>
-                  {appRepos.map((app) => (
-                    <a
-                      key={app.name}
-                      href={app.replitUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/50 transition-colors"
-                      data-testid={`link-repo-${app.name.toLowerCase().replace(/\s+/g, "-")}`}
-                    >
-                      <div>
-                        <div className="font-medium text-sm">{app.name}</div>
-                        <div className="text-xs text-muted-foreground">{app.description}</div>
-                      </div>
-                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
-                    </a>
-                  ))}
-                </div>
-              </TabsContent>
-              <TabsContent value="self-host" className="mt-4 space-y-4">
-                <div className="rounded-lg border bg-muted/30 p-4">
-                  <h4 className="font-semibold text-sm">Download Code as ZIP</h4>
-                  <ol className="mt-3 space-y-2 text-sm text-muted-foreground list-decimal list-inside">
-                    <li>Open the app in Replit (links below)</li>
-                    <li>Click the three-dot menu <strong>(⋮)</strong> in the file tree</li>
-                    <li>Select <strong>"Download as ZIP"</strong></li>
-                    <li>Extract the files on your server</li>
-                  </ol>
-                </div>
-                <div className="rounded-lg border bg-muted/30 p-4">
-                  <h4 className="font-semibold text-sm">Server Requirements</h4>
-                  <ul className="mt-3 space-y-2 text-sm text-muted-foreground list-disc list-inside">
-                    <li>Node.js 18+ runtime</li>
-                    <li>PostgreSQL database</li>
-                    <li>Set environment variables (DATABASE_URL, etc.)</li>
-                  </ul>
-                </div>
-                <div className="rounded-lg border bg-muted/30 p-4">
-                  <h4 className="font-semibold text-sm">Deployment Commands</h4>
-                  <div className="mt-3 space-y-2">
-                    <div className="flex items-center gap-2 rounded bg-black/5 px-3 py-2 font-mono text-xs">
-                      <Copy className="h-3 w-3 text-muted-foreground shrink-0" />
-                      <code>npm install</code>
-                    </div>
-                    <div className="flex items-center gap-2 rounded bg-black/5 px-3 py-2 font-mono text-xs">
-                      <Copy className="h-3 w-3 text-muted-foreground shrink-0" />
-                      <code>npm run build</code>
-                    </div>
-                    <div className="flex items-center gap-2 rounded bg-black/5 px-3 py-2 font-mono text-xs">
-                      <Copy className="h-3 w-3 text-muted-foreground shrink-0" />
-                      <code>npm start</code>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-sm">App Repositories</h4>
-                  {appRepos.map((app) => (
-                    <a
-                      key={app.name}
-                      href={app.replitUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/50 transition-colors"
-                      data-testid={`link-download-${app.name.toLowerCase().replace(/\s+/g, "-")}`}
-                    >
-                      <div>
-                        <div className="font-medium text-sm">{app.name}</div>
-                        <div className="text-xs text-muted-foreground">{app.description}</div>
-                      </div>
-                      <Download className="h-4 w-4 text-muted-foreground" />
-                    </a>
-                  ))}
-                </div>
-              </TabsContent>
-            </Tabs>
-          </DialogContent>
-        </Dialog>
+        <Link href="/tech-admin">
+          <Button
+            variant="secondary"
+            className="rounded-full bg-white/70 border border-border hover:bg-white gap-2 text-sm"
+            data-testid="button-tech-admin"
+          >
+            <Rocket className="h-4 w-4" />
+            Tech Admin
+          </Button>
+        </Link>
         <Link href="/account">
           <Button
             variant="secondary"
