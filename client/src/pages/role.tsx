@@ -376,16 +376,83 @@ function LookupStudentSection({ students, isLoading }: { students: StudentLookup
   );
 }
 
+const servicesByCategory: Record<string, string[]> = {
+  "Housing": [
+    "Housing Assistance",
+    "Emergency Shelter Referral",
+    "Transitional Housing",
+    "Transportation Support",
+    "Food Assistance",
+    "Clothing Closet",
+  ],
+  "Basic Needs": [
+    "Food Assistance",
+    "Clothing Closet",
+    "School Supplies",
+    "Transportation Support",
+    "Technology Access",
+    "ID Document Assistance",
+  ],
+  "Mental Health": [
+    "Mental Health Counseling",
+    "Crisis Intervention",
+    "Peer Support Groups",
+    "Family Reunification Support",
+  ],
+  "Education": [
+    "Academic Tutoring",
+    "College Prep Support",
+    "SAT/ACT Prep",
+    "School Supplies",
+    "Technology Access",
+  ],
+  "Employment": [
+    "Job Placement Assistance",
+    "Resume Building",
+    "Interview Coaching",
+    "Financial Literacy Coaching",
+  ],
+  "Financial": [
+    "Banking Setup",
+    "Financial Literacy Coaching",
+    "Insurance Enrollment",
+    "ID Document Assistance",
+  ],
+  "Healthcare": [
+    "Healthcare Navigation",
+    "Insurance Enrollment",
+    "Mental Health Counseling",
+  ],
+  "Legal": [
+    "Legal Aid Referral",
+    "ID Document Assistance",
+    "Independent Living Skills",
+  ],
+};
+
 function QuickActions({ role, studentId, onNavigate }: { role: RoleKey; studentId?: string; onNavigate?: (tab: string) => void }) {
   const [supportModalOpen, setSupportModalOpen] = React.useState(false);
   const [supportForm, setSupportForm] = React.useState({
-    requestType: "support",
+    serviceCategory: "",
+    serviceName: "",
     title: "",
     description: "",
     attachmentName: "",
   });
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const availableServices = supportForm.serviceCategory
+    ? servicesByCategory[supportForm.serviceCategory] || []
+    : [];
+
+  const handleCategoryChange = (category: string) => {
+    setSupportForm(prev => ({
+      ...prev,
+      serviceCategory: category,
+      serviceName: "",
+    }));
+  };
 
   const handleSubmitSupportRequest = async () => {
     if (!studentId || !supportForm.title.trim() || !supportForm.description.trim()) return;
@@ -394,13 +461,13 @@ function QuickActions({ role, studentId, onNavigate }: { role: RoleKey; studentI
     try {
       await createSupportRequest({
         studentId,
-        requestType: supportForm.requestType,
+        requestType: `${supportForm.serviceCategory} - ${supportForm.serviceName}`,
         title: supportForm.title,
         description: supportForm.description,
         attachmentName: supportForm.attachmentName || null,
       });
       setSupportModalOpen(false);
-      setSupportForm({ requestType: "support", title: "", description: "", attachmentName: "" });
+      setSupportForm({ serviceCategory: "", serviceName: "", title: "", description: "", attachmentName: "" });
     } catch (error) {
       console.error("Failed to submit support request:", error);
     } finally {
@@ -463,20 +530,41 @@ function QuickActions({ role, studentId, onNavigate }: { role: RoleKey; studentI
           
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="request-type">Request Type</Label>
+              <Label htmlFor="service-category">Service Category</Label>
               <select
-                id="request-type"
+                id="service-category"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                value={supportForm.requestType}
-                onChange={(e) => setSupportForm(prev => ({ ...prev, requestType: e.target.value }))}
-                data-testid="select-request-type"
+                value={supportForm.serviceCategory}
+                onChange={(e) => handleCategoryChange(e.target.value)}
+                data-testid="select-service-category"
               >
-                <option value="support">General Support</option>
-                <option value="transportation">Transportation</option>
-                <option value="equipment">Equipment/Resources</option>
-                <option value="mentorship">Mentorship</option>
-                <option value="accommodation">Accommodation</option>
-                <option value="other">Other</option>
+                <option value="">Select a category...</option>
+                {Object.keys(servicesByCategory).map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="service-name">Service Name</Label>
+              <select
+                id="service-name"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                value={supportForm.serviceName}
+                onChange={(e) => setSupportForm(prev => ({ ...prev, serviceName: e.target.value }))}
+                disabled={!supportForm.serviceCategory}
+                data-testid="select-service-name"
+              >
+                <option value="">
+                  {supportForm.serviceCategory ? "Select a service..." : "Select a category first"}
+                </option>
+                {availableServices.map((service) => (
+                  <option key={service} value={service}>
+                    {service}
+                  </option>
+                ))}
               </select>
             </div>
 
