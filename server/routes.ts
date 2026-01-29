@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { seedDatabase } from "./seed";
 import { 
   insertStudentSchema,
   insertStudentGoalSchema,
@@ -492,6 +493,18 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error fetching from Unity Code Academy API:", error);
       res.status(500).json({ error: "Failed to fetch learning path data" });
+    }
+  });
+
+  // One-time seed endpoint for production database
+  app.post("/api/admin/seed-database", async (req, res) => {
+    try {
+      console.log("Starting database seed via API...");
+      const result = await seedDatabase();
+      res.json(result);
+    } catch (error) {
+      console.error("Error seeding database:", error);
+      res.status(500).json({ error: "Failed to seed database", details: String(error) });
     }
   });
 

@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { students, studentGoals, studentSkills, placements, studentOutcomes, mentors } from "@shared/schema";
+import { students, studentGoals, studentSkills, placements, studentOutcomes, mentors, devices, deviceAllocations } from "@shared/schema";
 import fs from "fs";
 import path from "path";
 
@@ -266,11 +266,83 @@ async function seedDatabase() {
     await db.insert(mentors).values(mentorData).onConflictDoNothing();
   }
 
+  // Read and parse devices
+  const devicesCsvPath = path.join(process.cwd(), "attached_assets/devices_1769645792231.csv");
+  const allocationsCsvPath = path.join(process.cwd(), "attached_assets/device_allocations_1769645792230.csv");
+  
+  if (fs.existsSync(devicesCsvPath)) {
+    const devicesCsv = fs.readFileSync(devicesCsvPath, "utf-8");
+    const deviceData = parseCsv(devicesCsv, (r) => ({
+      id: r.serial_number,
+      resourceId: r.resource_id,
+      resourceName: r.resource_name,
+      resourceType: r.resource_type,
+      description: r.description,
+      category: r.category,
+      brand: r.brand,
+      modelNumber: r.model_number,
+      serialNumber: r.serial_number,
+      purchaseDate: r.purchase_date,
+      purchaseCost: r.purchase_cost,
+      currentValue: r.current_value,
+      warrantyExpiration: r.warranty_expiration,
+      location: r.location,
+      condition: r.condition,
+      maintenanceSchedule: r.maintenance_schedule,
+      lastMaintenanceDate: r.last_maintenance_date,
+      checkoutAllowed: parseBool(r.checkout_allowed),
+      maxCheckoutDays: parseNum(r.max_checkout_days),
+      requiresTraining: parseBool(r.requires_training),
+      responsibleStaffId: r.responsible_staff_id,
+      insuranceValue: r.insurance_value,
+      status: r.status,
+    }));
+
+    console.log(`Inserting ${deviceData.length} devices...`);
+    if (deviceData.length > 0) {
+      await db.insert(devices).values(deviceData).onConflictDoNothing();
+    }
+  }
+
+  if (fs.existsSync(allocationsCsvPath)) {
+    const allocationsCsv = fs.readFileSync(allocationsCsvPath, "utf-8");
+    const allocationData = parseCsv(allocationsCsv, (r) => ({
+      id: r.allocation_id,
+      deviceId: r.resource_id ? `SN-61000${r.resource_id.replace('RES-', '')}`.slice(0, 12) : null,
+      studentId: parseNullable(r.student_id),
+      staffId: parseNullable(r.staff_id),
+      programId: parseNullable(r.program_id),
+      projectId: parseNullable(r.project_id),
+      allocatedToType: r.allocated_to_type,
+      allocationPurpose: r.allocation_purpose,
+      requestDate: r.request_date,
+      checkoutDate: r.checkout_date,
+      expectedReturnDate: r.expected_return_date,
+      actualReturnDate: parseNullable(r.actual_return_date),
+      checkoutStaffId: r.checkout_staff_id,
+      checkinStaffId: parseNullable(r.checkin_staff_id),
+      conditionAtCheckout: r.condition_at_checkout,
+      conditionAtReturn: parseNullable(r.condition_at_return),
+      damageReported: parseBool(r.damage_reported),
+      damageDescription: parseNullable(r.damage_description),
+      repairCost: parseNullable(r.repair_cost),
+      lateReturn: parseBool(r.late_return),
+      lateFeeCharged: parseNullable(r.late_fee_charged),
+      trainingVerified: parseBool(r.training_verified),
+      agreementSigned: parseBool(r.agreement_signed),
+      notes: parseNullable(r.notes),
+      status: r.status,
+    }));
+
+    console.log(`Inserting ${allocationData.length} device allocations...`);
+    if (allocationData.length > 0) {
+      await db.insert(deviceAllocations).values(allocationData).onConflictDoNothing();
+    }
+  }
+
   console.log("Database seed completed!");
-  process.exit(0);
+  return { success: true, message: "Database seeded successfully" };
 }
 
-seedDatabase().catch((error) => {
-  console.error("Error seeding database:", error);
-  process.exit(1);
-});
+// Export for use in API endpoint
+export { seedDatabase };
