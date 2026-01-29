@@ -211,6 +211,67 @@ export const supportRequests = pgTable("support_requests", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Devices table
+export const devices = pgTable("devices", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  resourceId: varchar("resource_id"),
+  resourceName: text("resource_name").notNull(),
+  resourceType: text("resource_type"),
+  description: text("description"),
+  category: text("category"),
+  brand: text("brand"),
+  modelNumber: text("model_number"),
+  serialNumber: text("serial_number"),
+  purchaseDate: text("purchase_date"),
+  purchaseCost: decimal("purchase_cost"),
+  currentValue: decimal("current_value"),
+  warrantyExpiration: text("warranty_expiration"),
+  location: text("location"),
+  condition: text("condition"),
+  maintenanceSchedule: text("maintenance_schedule"),
+  lastMaintenanceDate: text("last_maintenance_date"),
+  checkoutAllowed: boolean("checkout_allowed").default(true),
+  maxCheckoutDays: integer("max_checkout_days"),
+  requiresTraining: boolean("requires_training").default(false),
+  responsibleStaffId: varchar("responsible_staff_id"),
+  insuranceValue: decimal("insurance_value"),
+  status: text("status").default("Available"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Device Allocations table
+export const deviceAllocations = pgTable("device_allocations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  allocationId: varchar("allocation_id"),
+  resourceId: varchar("resource_id"),
+  allocatedToType: text("allocated_to_type"),
+  allocationPurpose: text("allocation_purpose"),
+  requestDate: text("request_date"),
+  checkoutDate: text("checkout_date"),
+  expectedReturnDate: text("expected_return_date"),
+  actualReturnDate: text("actual_return_date"),
+  checkoutStaffId: varchar("checkout_staff_id"),
+  checkinStaffId: varchar("checkin_staff_id"),
+  conditionAtCheckout: text("condition_at_checkout"),
+  conditionAtReturn: text("condition_at_return"),
+  damageReported: boolean("damage_reported").default(false),
+  damageDescription: text("damage_description"),
+  repairCost: decimal("repair_cost"),
+  lateReturn: boolean("late_return").default(false),
+  lateFeeCharged: decimal("late_fee_charged"),
+  trainingVerified: boolean("training_verified").default(false),
+  agreementSigned: boolean("agreement_signed").default(false),
+  notes: text("notes"),
+  status: text("status").default("Active"),
+  studentId: varchar("student_id"),
+  staffId: varchar("staff_id"),
+  programId: varchar("program_id"),
+  projectId: varchar("project_id"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Relations
 export const userRolesRelations = relations(userRoles, ({ one }) => ({
   user: one(users, {
@@ -343,6 +404,18 @@ export const insertStudentCertificationSchema = createInsertSchema(studentCertif
   updatedAt: true,
 });
 
+export const insertDeviceSchema = createInsertSchema(devices).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertDeviceAllocationSchema = createInsertSchema(deviceAllocations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -370,3 +443,9 @@ export type SupportRequest = typeof supportRequests.$inferSelect;
 
 export type InsertStudentCertification = z.infer<typeof insertStudentCertificationSchema>;
 export type StudentCertification = typeof studentCertifications.$inferSelect;
+
+export type InsertDevice = z.infer<typeof insertDeviceSchema>;
+export type Device = typeof devices.$inferSelect;
+
+export type InsertDeviceAllocation = z.infer<typeof insertDeviceAllocationSchema>;
+export type DeviceAllocation = typeof deviceAllocations.$inferSelect;
