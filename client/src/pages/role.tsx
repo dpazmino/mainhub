@@ -532,7 +532,7 @@ function LookupStudentSection({ students, isLoading }: { students: StudentLookup
                   </div>
                   <div className="rounded-2xl border border-border bg-white/60 p-3 text-center" data-testid="lookup-stat-level">
                     <div className="text-lg font-bold text-purple-600">Lvl {dashboardState.progress.user.level}</div>
-                    <div className="text-xs text-muted-foreground">{dashboardState.progress.user.totalXP} XP</div>
+                    <div className="text-xs text-muted-foreground">{dashboardState.progress.user.totalXp} XP</div>
                   </div>
                 </div>
               </CardContent>
