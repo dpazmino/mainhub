@@ -304,7 +304,7 @@ function LookupStudentSection({ students, isLoading }: { students: StudentLookup
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <div className="text-xs text-muted-foreground">Student ID</div>
                 <div className="font-medium" data-testid="text-detail-student-id">
@@ -437,7 +437,7 @@ function QuickActions({ role, studentId, onNavigate }: { role: RoleKey; studentI
 
   return (
     <>
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
         {actions[role].map((a, idx) => (
           <Button
             key={a.label}
@@ -644,7 +644,7 @@ function StudentPanel({
 
   if (datasetState.status !== "ready") {
     return (
-      <div className="grid gap-4 lg:grid-cols-3" data-testid="status-student-dataset-loading">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-testid="status-student-dataset-loading">
         <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
           <CardContent className="p-5">
             <div className="text-sm text-muted-foreground" data-testid="text-student-loading-1">
@@ -691,7 +691,7 @@ function StudentPanel({
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3" data-testid="progress-stats-grid">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3" data-testid="progress-stats-grid">
                 <div className="rounded-2xl border border-border bg-white/60 p-3 text-center" data-testid="stat-streak">
                   <div className="text-lg font-bold text-orange-500">{datasetState.progressData.user.currentStreak}</div>
                   <div className="text-xs text-muted-foreground">Day Streak</div>
@@ -838,7 +838,7 @@ function StudentPanel({
 
 function StaffPanel() {
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
         <CardHeader className="pb-2">
           <div className="text-sm font-medium" data-testid="text-staff-tools-title">
@@ -956,7 +956,7 @@ function StaffPanel() {
 
 function ExperiencePanel() {
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <Card className="rounded-3xl bg-white/70 border-border/70 shadow-sm">
         <CardHeader className="pb-2">
           <div className="text-sm font-medium" data-testid="text-exp-mentors-title">

@@ -204,8 +204,11 @@ export default function DevicesGrid() {
           View and manage device checkouts. Changes are saved automatically.
         </p>
       </CardHeader>
-      <CardContent className="p-4">
-        <div className="overflow-x-auto">
+      <CardContent className="p-2 sm:p-4">
+        <div className="text-xs text-muted-foreground mb-2 sm:hidden">
+          Scroll horizontally to see all columns
+        </div>
+        <div className="overflow-x-auto -mx-2 sm:mx-0">
           <table className="w-full text-sm" data-testid="table-device-allocations">
             <thead>
               <tr className="border-b border-border/50">

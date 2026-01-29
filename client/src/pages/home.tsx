@@ -50,7 +50,7 @@ const roleConfig: Record<
 
 function TopBar() {
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-3">
         <div
           className="h-10 w-10 rounded-2xl bg-white shadow-sm ring-1 ring-border grid place-items-center"
@@ -68,7 +68,7 @@ function TopBar() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Badge
           variant="secondary"
           className="rounded-full border border-border bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/50"
@@ -78,7 +78,7 @@ function TopBar() {
         </Badge>
         <Button
           variant="secondary"
-          className="rounded-full bg-white/70 border border-border hover:bg-white"
+          className="rounded-full bg-white/70 border border-border hover:bg-white text-sm"
           data-testid="button-learn-more"
         >
           How it works
@@ -86,7 +86,7 @@ function TopBar() {
         <Link href="/account">
           <Button
             variant="secondary"
-            className="rounded-full bg-white/70 border border-border hover:bg-white gap-2"
+            className="rounded-full bg-white/70 border border-border hover:bg-white gap-2 text-sm"
             data-testid="button-account"
           >
             <User className="h-4 w-4" />
@@ -100,10 +100,10 @@ function TopBar() {
 
 function Hero() {
   return (
-    <section className="pt-10 md:pt-16">
+    <section className="pt-8 md:pt-16">
       <div>
         <Badge
-          className="rounded-full px-3 py-1 text-[12px] bg-white/70 text-foreground border border-border shadow-sm"
+          className="rounded-full px-3 py-1 text-[11px] sm:text-[12px] bg-white/70 text-foreground border border-border shadow-sm"
           variant="secondary"
           data-testid="badge-hero"
         >
@@ -111,7 +111,7 @@ function Hero() {
         </Badge>
 
         <h1
-          className="mt-4 font-serif text-4xl md:text-6xl leading-[1.03] tracking-[-0.02em]"
+          className="mt-4 font-serif text-3xl sm:text-4xl md:text-6xl leading-[1.08] tracking-[-0.02em]"
           data-testid="text-hero-title"
         >
           A hub that meets people where they are—
@@ -125,7 +125,7 @@ function Hero() {
 function About() {
   return (
     <section className="pt-10 md:pt-14" data-testid="section-about">
-      <div className="grid gap-8 md:grid-cols-[1.1fr_0.9fr] md:items-start">
+      <div className="grid gap-6 md:gap-8 md:grid-cols-[1.1fr_0.9fr] md:items-start">
         <div>
           <h2 className="font-serif text-2xl md:text-3xl tracking-tight" data-testid="text-about-title">
             About Better Youth
@@ -229,7 +229,7 @@ function RoleSelection() {
         Select your role to access the personalized dashboard with features tailored to your needs.
       </p>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-3" data-testid="grid-roles">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-testid="grid-roles">
         {(Object.keys(roleConfig) as RoleKey[]).map((key) => {
           const role = roleConfig[key];
           return (
