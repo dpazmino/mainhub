@@ -131,6 +131,13 @@ function LookupStudentSection({ students, isLoading }: { students: StudentLookup
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  
+  const [dashboardState, setDashboardState] = React.useState<
+    | { status: "idle" }
+    | { status: "loading" }
+    | { status: "ready"; goals: any[]; skills: any[]; placements: any[]; progress: StudentProgressData | null }
+    | { status: "error"; message: string }
+  >({ status: "idle" });
 
   const filteredStudents = React.useMemo(() => {
     if (!searchQuery.trim()) return [];
@@ -143,10 +150,23 @@ function LookupStudentSection({ students, isLoading }: { students: StudentLookup
     );
   }, [students, searchQuery]);
 
-  const handleStudentSelect = (student: StudentLookupResult) => {
+  const handleStudentSelect = async (student: StudentLookupResult) => {
     setSelectedStudent(student);
     setSearchQuery(student.studentId);
     setIsDropdownOpen(false);
+    
+    setDashboardState({ status: "loading" });
+    try {
+      const [goals, skills, placements, progress] = await Promise.all([
+        getStudentGoals(student.id),
+        getStudentSkills(student.id),
+        getStudentPlacements(student.id),
+        getStudentProgress(student.id).catch(() => null),
+      ]);
+      setDashboardState({ status: "ready", goals, skills, placements, progress });
+    } catch (error) {
+      setDashboardState({ status: "error", message: "Failed to load student dashboard" });
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -182,6 +202,7 @@ function LookupStudentSection({ students, isLoading }: { students: StudentLookup
     setSelectedStudent(null);
     setSearchQuery("");
     setIsDropdownOpen(false);
+    setDashboardState({ status: "idle" });
     inputRef.current?.focus();
   };
 
@@ -371,6 +392,153 @@ function LookupStudentSection({ students, isLoading }: { students: StudentLookup
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {selectedStudent && dashboardState.status === "loading" && (
+        <Card className="rounded-2xl bg-white/70 border-border/70 shadow-sm">
+          <CardContent className="p-6 text-center">
+            <p className="text-muted-foreground" data-testid="text-dashboard-loading">
+              Loading student dashboard...
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {selectedStudent && dashboardState.status === "error" && (
+        <Card className="rounded-2xl bg-white/70 border-border/70 shadow-sm">
+          <CardContent className="p-6 text-center">
+            <p className="text-red-600" data-testid="text-dashboard-error">
+              {dashboardState.message}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {selectedStudent && dashboardState.status === "ready" && (
+        <div className="space-y-4" data-testid="container-student-dashboard">
+          <h3 className="text-base font-semibold" data-testid="text-dashboard-title">
+            Student Dashboard
+          </h3>
+          
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Card className="rounded-2xl bg-white/70 border-border/70 shadow-sm">
+              <CardHeader className="pb-2">
+                <div className="text-sm font-medium" data-testid="text-goals-title">Goals & Progress</div>
+                <div className="text-xs text-muted-foreground">Track goal completion</div>
+              </CardHeader>
+              <CardContent>
+                {dashboardState.goals.length === 0 ? (
+                  <p className="text-sm text-muted-foreground" data-testid="text-no-goals">No goals set</p>
+                ) : (
+                  <div className="space-y-3">
+                    {dashboardState.goals.slice(0, 3).map((goal) => (
+                      <div key={goal.id} className="space-y-1" data-testid={`goal-item-${goal.id}`}>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-medium truncate max-w-[150px]">{goal.goalTitle}</span>
+                          <Badge variant="secondary" className="text-[10px]">{goal.priority}</Badge>
+                        </div>
+                        <Progress value={goal.progressPercentage ?? 0} className="h-1.5" />
+                        <div className="text-[10px] text-muted-foreground">{goal.progressPercentage ?? 0}% complete</div>
+                      </div>
+                    ))}
+                    {dashboardState.goals.length > 3 && (
+                      <p className="text-xs text-muted-foreground">+{dashboardState.goals.length - 3} more goals</p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-2xl bg-white/70 border-border/70 shadow-sm">
+              <CardHeader className="pb-2">
+                <div className="text-sm font-medium" data-testid="text-skills-title">Skills</div>
+                <div className="text-xs text-muted-foreground">Current proficiency levels</div>
+              </CardHeader>
+              <CardContent>
+                {dashboardState.skills.length === 0 ? (
+                  <p className="text-sm text-muted-foreground" data-testid="text-no-skills">No skills recorded</p>
+                ) : (
+                  <div className="space-y-2">
+                    {dashboardState.skills.slice(0, 4).map((skill) => (
+                      <div key={skill.id} className="flex items-center justify-between" data-testid={`skill-item-${skill.id}`}>
+                        <span className="text-xs truncate max-w-[120px]">{skill.skillName}</span>
+                        <Badge variant="outline" className="text-[10px]">{skill.currentProficiencyLevel}</Badge>
+                      </div>
+                    ))}
+                    {dashboardState.skills.length > 4 && (
+                      <p className="text-xs text-muted-foreground">+{dashboardState.skills.length - 4} more skills</p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-2xl bg-white/70 border-border/70 shadow-sm">
+              <CardHeader className="pb-2">
+                <div className="text-sm font-medium" data-testid="text-placements-title">Work Placements</div>
+                <div className="text-xs text-muted-foreground">Employment history</div>
+              </CardHeader>
+              <CardContent>
+                {dashboardState.placements.length === 0 ? (
+                  <p className="text-sm text-muted-foreground" data-testid="text-no-placements">No placements</p>
+                ) : (
+                  <div className="space-y-2">
+                    {dashboardState.placements.slice(0, 3).map((placement) => (
+                      <div key={placement.id} className="space-y-0.5" data-testid={`placement-item-${placement.id}`}>
+                        <div className="text-xs font-medium truncate">{placement.jobTitle || "Position"}</div>
+                        <div className="text-[10px] text-muted-foreground">{placement.employerName}</div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={placement.isCurrent ? "default" : "secondary"} className="text-[10px]">
+                            {placement.isCurrent ? "Current" : "Past"}
+                          </Badge>
+                          {placement.hourlyWage && (
+                            <span className="text-[10px] text-green-600">${placement.hourlyWage}/hr</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    {dashboardState.placements.length > 3 && (
+                      <p className="text-xs text-muted-foreground">+{dashboardState.placements.length - 3} more placements</p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {dashboardState.progress && (
+            <Card className="rounded-2xl bg-white/70 border-border/70 shadow-sm">
+              <CardHeader className="pb-2">
+                <div className="text-sm font-medium" data-testid="text-progress-title">Learning Progress</div>
+                <div className="text-xs text-muted-foreground">Course completion and activity</div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                  <div className="rounded-2xl border border-border bg-white/60 p-3 text-center" data-testid="lookup-stat-streak">
+                    <div className="text-lg font-bold text-orange-500">{dashboardState.progress.user.currentStreak}</div>
+                    <div className="text-xs text-muted-foreground">Day Streak</div>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-white/60 p-3 text-center" data-testid="lookup-stat-lessons">
+                    <div className="text-lg font-bold text-primary">{dashboardState.progress.lessonsCompleted}/{dashboardState.progress.totalLessons}</div>
+                    <div className="text-xs text-muted-foreground">Lessons</div>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-white/60 p-3 text-center" data-testid="lookup-stat-videos">
+                    <div className="text-lg font-bold text-primary">{dashboardState.progress.videosWatched}/{dashboardState.progress.totalVideos}</div>
+                    <div className="text-xs text-muted-foreground">Videos</div>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-white/60 p-3 text-center" data-testid="lookup-stat-progress">
+                    <div className="text-lg font-bold text-green-600">{dashboardState.progress.progressPercent}%</div>
+                    <div className="text-xs text-muted-foreground">Progress</div>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-white/60 p-3 text-center" data-testid="lookup-stat-level">
+                    <div className="text-lg font-bold text-purple-600">Lvl {dashboardState.progress.user.level}</div>
+                    <div className="text-xs text-muted-foreground">{dashboardState.progress.user.totalXP} XP</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       )}
     </div>
   );
