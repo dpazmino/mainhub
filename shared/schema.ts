@@ -169,6 +169,30 @@ export const mentors = pgTable("mentors", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Student Certifications table
+export const studentCertifications = pgTable("student_certifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  studentId: varchar("student_id").notNull().references(() => students.id),
+  certificationId: varchar("certification_id").notNull(),
+  attemptDate: text("attempt_date"),
+  attemptNumber: integer("attempt_number").default(1),
+  examScore: decimal("exam_score", { precision: 5, scale: 2 }),
+  passed: boolean("passed").default(false),
+  issueDate: text("issue_date"),
+  expirationDate: text("expiration_date"),
+  certificateNumber: varchar("certificate_number"),
+  verifiedByStaffId: varchar("verified_by_staff_id"),
+  digitalBadgeIssued: boolean("digital_badge_issued").default(false),
+  badgeUrl: text("badge_url"),
+  linkedToPortfolio: boolean("linked_to_portfolio").default(false),
+  employerVerified: boolean("employer_verified").default(false),
+  renewalReminderSent: boolean("renewal_reminder_sent").default(false),
+  status: text("status").default("active"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Student Support Requests table
 export const supportRequests = pgTable("support_requests", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -212,6 +236,7 @@ export const studentsRelations = relations(students, ({ many, one }) => ({
   skills: many(studentSkills),
   placements: many(placements),
   outcomes: many(studentOutcomes),
+  certifications: many(studentCertifications),
 }));
 
 export const studentGoalsRelations = relations(studentGoals, ({ one }) => ({
@@ -252,6 +277,13 @@ export const mentorsRelations = relations(mentors, ({ one }) => ({
 export const supportRequestsRelations = relations(supportRequests, ({ one }) => ({
   student: one(students, {
     fields: [supportRequests.studentId],
+    references: [students.id],
+  }),
+}));
+
+export const studentCertificationsRelations = relations(studentCertifications, ({ one }) => ({
+  student: one(students, {
+    fields: [studentCertifications.studentId],
     references: [students.id],
   }),
 }));
@@ -305,6 +337,12 @@ export const insertSupportRequestSchema = createInsertSchema(supportRequests).om
   updatedAt: true,
 });
 
+export const insertStudentCertificationSchema = createInsertSchema(studentCertifications).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -329,3 +367,6 @@ export type Mentor = typeof mentors.$inferSelect;
 
 export type InsertSupportRequest = z.infer<typeof insertSupportRequestSchema>;
 export type SupportRequest = typeof supportRequests.$inferSelect;
+
+export type InsertStudentCertification = z.infer<typeof insertStudentCertificationSchema>;
+export type StudentCertification = typeof studentCertifications.$inferSelect;
