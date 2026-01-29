@@ -480,5 +480,20 @@ export async function registerRoutes(
     }
   });
 
+  // Proxy endpoint for external Unity Code Academy API
+  app.get("/api/external/unity-students", async (req, res) => {
+    try {
+      const response = await fetch("https://unity-code-academy.replit.app/api/v1/students");
+      if (!response.ok) {
+        throw new Error(`External API returned ${response.status}`);
+      }
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error("Error fetching from Unity Code Academy API:", error);
+      res.status(500).json({ error: "Failed to fetch learning path data" });
+    }
+  });
+
   return httpServer;
 }

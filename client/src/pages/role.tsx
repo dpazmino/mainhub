@@ -646,7 +646,7 @@ function QuickActions({ role, studentId, onNavigate }: { role: RoleKey; studentI
     setLearningPathModalOpen(true);
     setLearningPathData({ status: "loading" });
     try {
-      const response = await fetch("https://unity-code-academy.replit.app/api/v1/students");
+      const response = await fetch("/api/external/unity-students");
       const result = await response.json();
       if (result.success && result.data && result.data.length > 0) {
         setLearningPathData({ status: "ready", data: result.data[0] });
