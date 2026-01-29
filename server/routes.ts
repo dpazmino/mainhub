@@ -8,6 +8,7 @@ import {
   insertPlacementSchema,
   insertStudentOutcomeSchema,
   insertSupportRequestSchema,
+  insertDeviceAllocationSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(
@@ -415,6 +416,67 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error updating support request:", error);
       res.status(500).json({ error: "Failed to update support request" });
+    }
+  });
+
+  // Device routes
+  app.get("/api/devices", async (req, res) => {
+    try {
+      const deviceList = await storage.listDevices();
+      res.json(deviceList);
+    } catch (error) {
+      console.error("Error fetching devices:", error);
+      res.status(500).json({ error: "Failed to fetch devices" });
+    }
+  });
+
+  app.get("/api/devices/:id", async (req, res) => {
+    try {
+      const device = await storage.getDevice(req.params.id);
+      if (!device) {
+        return res.status(404).json({ error: "Device not found" });
+      }
+      res.json(device);
+    } catch (error) {
+      console.error("Error fetching device:", error);
+      res.status(500).json({ error: "Failed to fetch device" });
+    }
+  });
+
+  // Device allocations routes
+  app.get("/api/device-allocations", async (req, res) => {
+    try {
+      const allocations = await storage.listDeviceAllocations();
+      res.json(allocations);
+    } catch (error) {
+      console.error("Error fetching device allocations:", error);
+      res.status(500).json({ error: "Failed to fetch device allocations" });
+    }
+  });
+
+  app.get("/api/device-allocations/:id", async (req, res) => {
+    try {
+      const allocation = await storage.getDeviceAllocation(req.params.id);
+      if (!allocation) {
+        return res.status(404).json({ error: "Device allocation not found" });
+      }
+      res.json(allocation);
+    } catch (error) {
+      console.error("Error fetching device allocation:", error);
+      res.status(500).json({ error: "Failed to fetch device allocation" });
+    }
+  });
+
+  app.patch("/api/device-allocations/:id", async (req, res) => {
+    try {
+      const allocation = await storage.updateDeviceAllocation(req.params.id, req.body);
+      if (!allocation) {
+        return res.status(404).json({ error: "Device allocation not found" });
+      }
+      res.json(allocation);
+    } catch (error) {
+      console.error("Error updating device allocation:", error);
+      res.status(500).json({ error: "Failed to update device allocation" });
     }
   });
 

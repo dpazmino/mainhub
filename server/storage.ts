@@ -7,6 +7,8 @@ import {
   studentOutcomes,
   mentors,
   supportRequests,
+  devices,
+  deviceAllocations,
   type User,
   type Student,
   type StudentGoal,
@@ -15,6 +17,8 @@ import {
   type StudentOutcome,
   type Mentor,
   type SupportRequest,
+  type Device,
+  type DeviceAllocation,
   type InsertUser,
   type InsertStudent,
   type InsertStudentGoal,
@@ -23,6 +27,7 @@ import {
   type InsertStudentOutcome,
   type InsertMentor,
   type InsertSupportRequest,
+  type InsertDeviceAllocation,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
@@ -70,6 +75,15 @@ export interface IStorage {
   getStudentSupportRequests(studentId: string): Promise<SupportRequest[]>;
   createSupportRequest(request: InsertSupportRequest): Promise<SupportRequest>;
   updateSupportRequest(id: string, updates: Partial<InsertSupportRequest>): Promise<SupportRequest | undefined>;
+
+  // Device operations
+  listDevices(): Promise<Device[]>;
+  getDevice(id: string): Promise<Device | undefined>;
+
+  // Device allocation operations
+  listDeviceAllocations(): Promise<DeviceAllocation[]>;
+  getDeviceAllocation(id: string): Promise<DeviceAllocation | undefined>;
+  updateDeviceAllocation(id: string, updates: Partial<InsertDeviceAllocation>): Promise<DeviceAllocation | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -221,6 +235,35 @@ export class DatabaseStorage implements IStorage {
       .where(eq(supportRequests.id, id))
       .returning();
     return request || undefined;
+  }
+
+  // Device operations
+  async listDevices(): Promise<Device[]> {
+    return db.select().from(devices);
+  }
+
+  async getDevice(id: string): Promise<Device | undefined> {
+    const [device] = await db.select().from(devices).where(eq(devices.id, id));
+    return device || undefined;
+  }
+
+  // Device allocation operations
+  async listDeviceAllocations(): Promise<DeviceAllocation[]> {
+    return db.select().from(deviceAllocations);
+  }
+
+  async getDeviceAllocation(id: string): Promise<DeviceAllocation | undefined> {
+    const [allocation] = await db.select().from(deviceAllocations).where(eq(deviceAllocations.id, id));
+    return allocation || undefined;
+  }
+
+  async updateDeviceAllocation(id: string, updates: Partial<InsertDeviceAllocation>): Promise<DeviceAllocation | undefined> {
+    const [allocation] = await db
+      .update(deviceAllocations)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(deviceAllocations.id, id))
+      .returning();
+    return allocation || undefined;
   }
 }
 
