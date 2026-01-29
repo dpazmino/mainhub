@@ -1,8 +1,10 @@
 import * as React from "react";
 import { Link } from "wouter";
 import {
+  ExternalLink,
   GraduationCap,
   Handshake,
+  Link2,
   Shield,
   Sparkles,
   User,
@@ -83,6 +85,52 @@ function TopBar() {
         >
           How it works
         </Button>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="secondary"
+              className="rounded-full bg-white/70 border border-border hover:bg-white gap-2 text-sm"
+              data-testid="button-useful-links"
+            >
+              <Link2 className="h-4 w-4" />
+              Useful Links
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-72 p-2" align="end">
+            <div className="grid gap-1">
+              <a
+                href="https://unity-code-academy.replit.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors"
+                data-testid="link-unity-code-academy"
+              >
+                <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                <span>Unity Code Academy</span>
+              </a>
+              <a
+                href="https://youth-connect.replit.app/onboarding"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors"
+                data-testid="link-youth-connect"
+              >
+                <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                <span>Youth Connect Onboarding</span>
+              </a>
+              <a
+                href="https://azure-connect.replit.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors"
+                data-testid="link-azure-connect"
+              >
+                <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                <span>Azure Connect</span>
+              </a>
+            </div>
+          </PopoverContent>
+        </Popover>
         <Link href="/account">
           <Button
             variant="secondary"
