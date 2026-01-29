@@ -8,12 +8,13 @@ import HomePage from "@/pages/home";
 import RolePage from "@/pages/role";
 import AccountPage from "@/pages/account";
 import TechAdminPage from "@/pages/tech-admin";
+import ResilienceReportPage from "@/pages/resilience-report";
 import { AppShell } from "@/components/app-shell";
 import { queryClient } from "./lib/queryClient";
 
 function Shell({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
-  const hideShell = location === "/" || location === "/tech-admin";
+  const hideShell = location === "/" || location === "/tech-admin" || location === "/resilience-report";
   return <AppShell hideShell={hideShell}>{children}</AppShell>;
 }
 
@@ -23,6 +24,7 @@ function Router() {
       <Switch>
         <Route path="/" component={HomePage} />
         <Route path="/tech-admin" component={TechAdminPage} />
+        <Route path="/resilience-report" component={ResilienceReportPage} />
         <Route path="/account" component={AccountPage} />
         <Route path="/role/student" component={() => <RolePage role="student" />} />
         <Route path="/role/staff" component={() => <RolePage role="staff" />} />

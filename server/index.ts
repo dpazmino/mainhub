@@ -5,6 +5,7 @@ import { createServer } from "http";
 import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
 
 const app = express();
+app.disable('x-powered-by');
 const httpServer = createServer(app);
 
 declare module "http" {

@@ -6,6 +6,7 @@ import {
   Link2,
   Rocket,
   Shield,
+  ShieldCheck,
   Sparkles,
   User,
 } from "lucide-react";
@@ -139,6 +140,16 @@ function TopBar() {
           >
             <Rocket className="h-4 w-4" />
             Tech Admin
+          </Button>
+        </Link>
+        <Link href="/resilience-report">
+          <Button
+            variant="secondary"
+            className="rounded-full bg-white/70 border border-border hover:bg-white gap-2 text-sm"
+            data-testid="button-resilience-report"
+          >
+            <ShieldCheck className="h-4 w-4" />
+            Security Report
           </Button>
         </Link>
         <Link href="/account">
