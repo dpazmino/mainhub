@@ -68,32 +68,51 @@ function parseCsv<T>(csv: string, mapRow: (row: Record<string, string>) => T): T
   });
 }
 
+function getAssetPath(filename: string): string {
+  // Try multiple paths for dev and production
+  const paths = [
+    path.join(process.cwd(), "attached_assets", filename),
+    path.join(process.cwd(), "dist/attached_assets", filename),
+    path.join(__dirname, "../attached_assets", filename),
+    path.join(__dirname, "attached_assets", filename),
+  ];
+  
+  for (const p of paths) {
+    if (fs.existsSync(p)) {
+      return p;
+    }
+  }
+  
+  // Default to first path
+  return paths[0];
+}
+
 async function seedDatabase() {
   console.log("Starting database seed...");
 
   // Read CSV files
   const studentsCsv = fs.readFileSync(
-    path.join(process.cwd(), "attached_assets/student_synthetic_1769631587193.csv"),
+    getAssetPath("student_synthetic_1769631587193.csv"),
     "utf-8"
   );
   const goalsCsv = fs.readFileSync(
-    path.join(process.cwd(), "attached_assets/student_goal_1769631587191.csv"),
+    getAssetPath("student_goal_1769631587191.csv"),
     "utf-8"
   );
   const skillsCsv = fs.readFileSync(
-    path.join(process.cwd(), "attached_assets/student_skill_1769631587192.csv"),
+    getAssetPath("student_skill_1769631587192.csv"),
     "utf-8"
   );
   const placementsCsv = fs.readFileSync(
-    path.join(process.cwd(), "attached_assets/placements_1769631587189.csv"),
+    getAssetPath("placements_1769631587189.csv"),
     "utf-8"
   );
   const outcomesCsv = fs.readFileSync(
-    path.join(process.cwd(), "attached_assets/student_ouctome_1769631587190.csv"),
+    getAssetPath("student_ouctome_1769631587190.csv"),
     "utf-8"
   );
   const mentorsCsv = fs.readFileSync(
-    path.join(process.cwd(), "attached_assets/mentor_synthetic_1769631587192.csv"),
+    getAssetPath("mentor_synthetic_1769631587192.csv"),
     "utf-8"
   );
 
@@ -267,8 +286,8 @@ async function seedDatabase() {
   }
 
   // Read and parse devices
-  const devicesCsvPath = path.join(process.cwd(), "attached_assets/devices_1769645792231.csv");
-  const allocationsCsvPath = path.join(process.cwd(), "attached_assets/device_allocations_1769645792230.csv");
+  const devicesCsvPath = getAssetPath("devices_1769645792231.csv");
+  const allocationsCsvPath = getAssetPath("device_allocations_1769645792230.csv");
   
   if (fs.existsSync(devicesCsvPath)) {
     const devicesCsv = fs.readFileSync(devicesCsvPath, "utf-8");

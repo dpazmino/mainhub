@@ -1,6 +1,6 @@
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
-import { rm, readFile } from "fs/promises";
+import { rm, readFile, cp, mkdir } from "fs/promises";
 
 // server deps to bundle to reduce openat(2) syscalls
 // which helps cold start times
@@ -59,6 +59,14 @@ async function buildAll() {
     external: externals,
     logLevel: "info",
   });
+
+  // Copy attached_assets folder to dist for production seeding
+  console.log("copying attached_assets...");
+  try {
+    await cp("attached_assets", "dist/attached_assets", { recursive: true });
+  } catch (err) {
+    console.warn("Could not copy attached_assets:", err);
+  }
 }
 
 buildAll().catch((err) => {
