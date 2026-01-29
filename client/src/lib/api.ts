@@ -7,6 +7,8 @@ import type {
   Mentor,
   SupportRequest,
   InsertSupportRequest,
+  Device,
+  DeviceAllocation,
 } from "@shared/schema";
 
 const API_BASE = "/api";
@@ -175,6 +177,31 @@ export async function createSupportRequest(request: InsertSupportRequest): Promi
 
 export async function updateSupportRequest(id: string, updates: Partial<SupportRequest>): Promise<SupportRequest> {
   return fetchJson<SupportRequest>(`/support-requests/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(updates),
+  });
+}
+
+// Devices
+export async function getDevices(): Promise<Device[]> {
+  return fetchJson<Device[]>("/devices");
+}
+
+export async function getDevice(id: string): Promise<Device> {
+  return fetchJson<Device>(`/devices/${id}`);
+}
+
+// Device Allocations
+export async function getDeviceAllocations(): Promise<DeviceAllocation[]> {
+  return fetchJson<DeviceAllocation[]>("/device-allocations");
+}
+
+export async function getDeviceAllocation(id: string): Promise<DeviceAllocation> {
+  return fetchJson<DeviceAllocation>(`/device-allocations/${id}`);
+}
+
+export async function updateDeviceAllocation(id: string, updates: Partial<DeviceAllocation>): Promise<DeviceAllocation> {
+  return fetchJson<DeviceAllocation>(`/device-allocations/${id}`, {
     method: "PATCH",
     body: JSON.stringify(updates),
   });

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 
 import { getStudents, getStudentGoals, getStudentSkills, getStudentPlacements, getMentors, getAllPlacements, getStudentProgress, createSupportRequest, type StudentProgressData } from "@/lib/api";
+import DevicesGrid from "@/components/DevicesGrid";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -375,7 +376,7 @@ function LookupStudentSection({ students, isLoading }: { students: StudentLookup
   );
 }
 
-function QuickActions({ role, studentId }: { role: RoleKey; studentId?: string }) {
+function QuickActions({ role, studentId, onNavigate }: { role: RoleKey; studentId?: string; onNavigate?: (tab: string) => void }) {
   const [supportModalOpen, setSupportModalOpen] = React.useState(false);
   const [supportForm, setSupportForm] = React.useState({
     requestType: "support",
@@ -423,8 +424,8 @@ function QuickActions({ role, studentId }: { role: RoleKey; studentId?: string }
       { label: "Update support needs", icon: <Users className="h-4 w-4" />, onClick: () => setSupportModalOpen(true) },
     ],
     staff: [
-      { label: "Open CRM", icon: <Users className="h-4 w-4" /> },
-      { label: "Device management", icon: <Laptop className="h-4 w-4" /> },
+      { label: "Open CRM", icon: <Users className="h-4 w-4" />, onClick: () => onNavigate?.("lookup") },
+      { label: "Device management", icon: <Laptop className="h-4 w-4" />, onClick: () => onNavigate?.("devices") },
       { label: "KPI snapshot", icon: <LineChart className="h-4 w-4" /> },
     ],
     experience: [
@@ -1326,10 +1327,18 @@ export default function RolePage({ role }: { role: RoleKey }) {
       </div>
 
       <div className="pt-6">
-        <QuickActions role={role} studentId={role === "student" && datasetState.status === "ready" ? datasetState.selectedStudent?.student_id : undefined} />
+        <QuickActions 
+          role={role} 
+          studentId={role === "student" && datasetState.status === "ready" ? datasetState.selectedStudent?.student_id : undefined}
+          onNavigate={(tab) => setLocation(`/role/staff?tab=${tab}`)}
+        />
       </div>
 
-      {role === "staff" && currentTab === "lookup" ? (
+      {role === "staff" && currentTab === "devices" ? (
+        <div className="pt-6">
+          <DevicesGrid />
+        </div>
+      ) : role === "staff" && currentTab === "lookup" ? (
         <div className="pt-6">
           <LookupStudentSection students={allStudents} isLoading={datasetState.status === "loading"} />
         </div>
